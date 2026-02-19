@@ -1,0 +1,263 @@
+@import 'tailwindcss';
+
+/* ─── Claude Brand Theme ─── */
+@theme {
+	/* Dark mode (default) */
+	--color-bg: #1B1612;
+	--color-surface: #251F19;
+	--color-surface-hover: #302921;
+	--color-surface-raised: #3A3129;
+	--color-border: #443A30;
+	--color-border-subtle: #302921;
+	--color-text: #EDE8E3;
+	--color-text-secondary: #B5ADA4;
+	--color-text-muted: #7D7369;
+	--color-accent: #DA7756;
+	--color-accent-hover: #E8926F;
+	--color-accent-muted: #C4613E;
+	--color-accent-glow: rgba(218, 119, 86, 0.15);
+	--color-success: #5BAA6A;
+	--color-warning: #D4A843;
+	--color-error: #D05858;
+	--color-info: #6A9FBF;
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+}
+
+/* ─── Light Mode Overrides (matches Claude.ai aesthetic) ─── */
+html.light {
+	--color-bg: #EEEBE6;
+	--color-surface: #FAFAF8;
+	--color-surface-hover: #F0ECE7;
+	--color-surface-raised: #E5E0DA;
+	--color-border: #D8D2CA;
+	--color-border-subtle: #E5E0DA;
+	--color-text: #2D2118;
+	--color-text-secondary: #6B5D51;
+	--color-text-muted: #998B7D;
+	--color-accent: #C96442;
+	--color-accent-hover: #B55636;
+	--color-accent-muted: #DA7756;
+	--color-accent-glow: rgba(201, 100, 66, 0.12);
+	--color-success: #4A8F58;
+	--color-warning: #B8922A;
+	--color-error: #C04040;
+	--color-info: #4A7F9F;
+}
+
+@layer base {
+	html {
+		background-color: var(--color-bg);
+		color: var(--color-text);
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	body {
+		min-height: 100vh;
+	}
+
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-border) transparent;
+	}
+
+	*::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		background-color: var(--color-border);
+		border-radius: 3px;
+	}
+
+	*::-webkit-scrollbar-thumb:hover {
+		background-color: var(--color-text-muted);
+	}
+
+	::selection {
+		background-color: var(--color-accent);
+		color: white;
+	}
+}
+
+/* ─── Light Mode: soft shadows for cards ─── */
+html.light .card-elevated {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+	border-color: transparent;
+}
+
+html.light .card-elevated:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Terminal Search ─── */
+.terminal-search {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 0.75rem;
+	padding: 0.5rem 0.75rem;
+	transition: all 0.2s;
+}
+
+.terminal-search:focus-within {
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 1px var(--color-accent), 0 0 12px var(--color-accent-glow);
+}
+
+.terminal-search .prompt {
+	color: var(--color-accent);
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.875rem;
+	user-select: none;
+	flex-shrink: 0;
+}
+
+.terminal-search input {
+	flex: 1;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: var(--color-text);
+	font-family: var(--font-mono);
+	font-size: 0.8125rem;
+}
+
+.terminal-search input::placeholder {
+	color: var(--color-text-muted);
+	font-family: var(--font-mono);
+}
+
+.terminal-search .search-icon {
+	color: var(--color-text-muted);
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+}
+
+/* ─── Prose Markdown Styles ─── */
+.prose {
+	color: var(--color-text);
+	line-height: 1.7;
+	max-width: none;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+	color: var(--color-text);
+	font-weight: 600;
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+}
+
+.prose h1 { font-size: 1.5rem; }
+.prose h2 { font-size: 1.25rem; }
+.prose h3 { font-size: 1.125rem; }
+
+.prose p {
+	margin-bottom: 0.75em;
+}
+
+.prose a {
+	color: var(--color-accent);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.prose a:hover {
+	color: var(--color-accent-hover);
+}
+
+.prose code {
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 4px;
+	padding: 0.125em 0.375em;
+}
+
+.prose pre {
+	background: var(--color-bg) !important;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 8px;
+	padding: 1rem;
+	overflow-x: auto;
+	margin: 1em 0;
+}
+
+.prose pre code {
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: 0.8125rem;
+	line-height: 1.6;
+}
+
+/* ─── Shiki dual-theme: pick colors based on light/dark mode ─── */
+.shiki,
+.shiki span {
+	color: var(--shiki-dark) !important;
+	background-color: transparent !important;
+}
+
+html.light .shiki,
+html.light .shiki span {
+	color: var(--shiki-light) !important;
+}
+
+.prose ul, .prose ol {
+	padding-left: 1.5em;
+	margin-bottom: 0.75em;
+}
+
+.prose ul { list-style-type: disc; }
+.prose ol { list-style-type: decimal; }
+
+.prose li {
+	margin-bottom: 0.25em;
+}
+
+.prose blockquote {
+	border-left: 3px solid var(--color-accent);
+	padding-left: 1em;
+	color: var(--color-text-secondary);
+	margin: 1em 0;
+}
+
+.prose table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1em 0;
+}
+
+.prose th, .prose td {
+	border: 1px solid var(--color-border);
+	padding: 0.5em 0.75em;
+	text-align: left;
+}
+
+.prose th {
+	background: var(--color-surface);
+	font-weight: 600;
+}
+
+.prose hr {
+	border-color: var(--color-border);
+	margin: 1.5em 0;
+}
+
+.prose img {
+	max-width: 100%;
+	border-radius: 8px;
+}
