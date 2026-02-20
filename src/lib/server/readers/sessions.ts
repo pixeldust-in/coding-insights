@@ -64,7 +64,13 @@ export async function loadSessionMessages(
 
 async function renderMessagesMarkdown(messages: ConversationMessage[]): Promise<void> {
 	for (const msg of messages) {
-		if (typeof msg.content === 'string') continue;
+		if (typeof msg.content === 'string') {
+			if (msg.content.trim()) {
+				const html = await renderMarkdown(msg.content);
+				msg.content = [{ type: 'text', text: msg.content, renderedHtml: html }];
+			}
+			continue;
+		}
 		for (const block of msg.content) {
 			if (block.type === 'text' && block.text) {
 				(block as TextBlock).renderedHtml = await renderMarkdown(block.text);
