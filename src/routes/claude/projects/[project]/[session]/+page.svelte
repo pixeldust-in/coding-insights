@@ -25,11 +25,23 @@
 	breadcrumbs={[
 		{ label: 'Projects', href: '/claude/projects' },
 		{ label: data.displayName, href: `/claude/projects/${encodeURIComponent(data.projectDir)}` },
-		{ label: data.meta?.summary || data.firstPrompt || data.sessionId.slice(0, 8) }
+		{ label: data.sessionId.slice(0, 8) }
 	]}
 />
 
 <div class="p-6 space-y-6">
+	<!-- Session Title Card -->
+	{#if data.firstPrompt || data.meta?.summary}
+		<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
+			<p class="text-sm font-medium truncate">
+				{data.meta?.summary || data.firstPrompt}
+			</p>
+			<div class="flex items-center gap-4 mt-2 text-xs text-text-muted">
+				<span>{data.totalCount} messages</span>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Session Meta Bar -->
 	{#if data.meta || data.facets}
 	<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
