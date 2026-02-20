@@ -318,16 +318,17 @@ const extToLanguage: Record<string, string> = {
 	'.graphql': 'GraphQL', '.proto': 'Protobuf', '.tf': 'Terraform',
 };
 
-function extractFileExt(args: string): string | null {
-	try {
-		const parsed = JSON.parse(args);
-		const filePath = parsed.path || parsed.file_path || parsed.filename || '';
-		if (!filePath) return null;
-		const match = filePath.match(/(\.[a-zA-Z0-9]+)$/);
-		return match ? match[1].toLowerCase() : null;
-	} catch {
-		return null;
+function extractLanguagesFromPatch(input: string): string[] {
+	const langs: string[] = [];
+	const matches = input.matchAll(/\*\*\* (?:Update|Add|Delete) File:\s*(\S+)/g);
+	for (const m of matches) {
+		const ext = m[1].match(/(\.[a-zA-Z0-9]+)$/);
+		if (ext) {
+			const lang = extToLanguage[ext[1].toLowerCase()];
+			if (lang) langs.push(lang);
+		}
 	}
+	return langs;
 }
 
 /**
@@ -384,11 +385,13 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 				const name = (payload.name as string) || 'unknown';
 				functionCallCounts[name] = (functionCallCounts[name] || 0) + 1;
 
-				const args = payload.arguments as string;
-				if (args) {
-					const ext = extractFileExt(args);
-					if (ext && extToLanguage[ext]) {
-						languages[extToLanguage[ext]] = (languages[extToLanguage[ext]] || 0) + 1;
+				// Language detection from apply_patch (file paths in patch content)
+				if (name === 'apply_patch') {
+					const input = payload.input as string;
+					if (input) {
+						for (const lang of extractLanguagesFromPatch(input)) {
+							languages[lang] = (languages[lang] || 0) + 1;
+						}
 					}
 				}
 			}

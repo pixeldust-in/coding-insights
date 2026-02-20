@@ -24,6 +24,10 @@ npm run check      # Type-check with svelte-check
 
 - **Do NOT use Chrome DevTools MCP or Playwright MCP** tools unless explicitly told to do so by the user. For testing, use the dev server and type-checking instead.
 
+## Git Workflow
+
+- **Do NOT commit or push** unless the user explicitly asks you to. Always wait for explicit instructions before running `git commit` or `git push`.
+
 ## Key Conventions
 
 ### Theming
