@@ -2,26 +2,31 @@
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
 	import { getChartTheme, getChartPalette } from '$utils/chart-theme.js';
+	import { type TimePeriod, periodLabel, aggregateProjectActivity, formatPeriodLabel } from '$utils/time-period.js';
 	import type { DailyProjectActivity } from '$lib/server/types.js';
 
 	let {
-		data
+		data,
+		period = 'day'
 	}: {
 		data: DailyProjectActivity[];
+		period?: TimePeriod;
 	} = $props();
+
+	let aggregated = $derived(aggregateProjectActivity(data, period));
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
 
 	onMount(() => {
-		if (!data.length) return;
+		if (!aggregated.length) return;
 
 		const theme = getChartTheme(canvas);
 		const palette = getChartPalette(canvas);
 
 		// Collect all project names
 		const projectSet = new Set<string>();
-		data.forEach((d) => Object.keys(d.byProject).forEach((p) => projectSet.add(p)));
+		aggregated.forEach((d) => Object.keys(d.byProject).forEach((p) => projectSet.add(p)));
 
 		// Sort alphabetically, but push "Other" to the end
 		const projects = Array.from(projectSet).sort((a, b) => {
@@ -30,14 +35,11 @@
 			return a.localeCompare(b);
 		});
 
-		const labels = data.map((d) => {
-			const dt = new Date(d.date);
-			return `${dt.getMonth() + 1}/${dt.getDate()}`;
-		});
+		const labels = aggregated.map((d) => formatPeriodLabel(d.date, period));
 
 		const datasets = projects.map((project, i) => ({
 			label: project,
-			data: data.map((d) => d.byProject[project] || 0),
+			data: aggregated.map((d) => d.byProject[project] || 0),
 			backgroundColor: palette[i % palette.length],
 			borderColor: palette[i % palette.length],
 			borderWidth: 1
@@ -81,7 +83,7 @@
 </script>
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-	<h3 class="text-sm font-semibold text-text-secondary mb-4">Daily Activity by Project</h3>
+	<h3 class="text-sm font-semibold text-text-secondary mb-4">{periodLabel(period)} Activity by Project</h3>
 	{#if data.length}
 		<div class="h-64">
 			<canvas bind:this={canvas}></canvas>

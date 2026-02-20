@@ -11,6 +11,11 @@ export interface ProjectTokenUsage {
 	outputTokens: number;
 }
 
+export interface DailyProjectTokens {
+	date: string;
+	byProject: Record<string, { input: number; output: number }>;
+}
+
 // Stats Cache
 export interface DailyActivity {
 	date: string;

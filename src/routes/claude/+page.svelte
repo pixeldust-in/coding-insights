@@ -9,9 +9,12 @@
 	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
 	import ProjectActivityChart from '$components/analytics/ProjectActivityChart.svelte';
 	import ProjectTokenChart from '$components/analytics/ProjectTokenChart.svelte';
+	import TerminalSelect from '$components/shared/TerminalSelect.svelte';
 	import { formatNumber, formatTokens } from '$utils/format.js';
+	import { type TimePeriod, periodOptions } from '$utils/time-period.js';
 
 	let { data } = $props();
+	let period = $state<TimePeriod>('week');
 </script>
 
 <Header title="Dashboard" />
@@ -46,16 +49,26 @@
 		/>
 	</div>
 
+	<!-- Period Toggle -->
+	<div class="flex items-center gap-3">
+		<span class="text-xs text-text-muted uppercase tracking-wider">Period</span>
+		<TerminalSelect bind:value={period} options={periodOptions} />
+	</div>
+
 	<!-- Charts Row 1 -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		<ActivityChart data={data.stats.dailyActivity} />
-		<TokenChart data={data.stats.dailyModelTokens} />
+		{#key period}
+			<ActivityChart data={data.stats.dailyActivity} {period} />
+			<TokenChart data={data.stats.dailyModelTokens} {period} />
+		{/key}
 	</div>
 
 	<!-- Project Charts -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		<ProjectActivityChart data={data.dailyProjectActivity} />
-		<ProjectTokenChart data={data.projectTokenUsage} />
+		{#key period}
+			<ProjectActivityChart data={data.dailyProjectActivity} {period} />
+			<ProjectTokenChart data={data.dailyProjectTokens} {period} />
+		{/key}
 	</div>
 
 	<!-- Charts Row 2 -->

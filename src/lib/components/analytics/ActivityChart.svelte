@@ -2,22 +2,24 @@
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
 	import { getChartTheme } from '$utils/chart-theme.js';
+	import { type TimePeriod, periodLabel, aggregateActivity, formatPeriodLabel } from '$utils/time-period.js';
 
 	let {
-		data
+		data,
+		period = 'day'
 	}: {
 		data: { date: string; messageCount: number; sessionCount: number; toolCallCount: number }[];
+		period?: TimePeriod;
 	} = $props();
+
+	let aggregated = $derived(aggregateActivity(data, period));
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
 
 	onMount(() => {
 		const theme = getChartTheme(canvas);
-		const labels = data.map((d) => {
-			const dt = new Date(d.date);
-			return `${dt.getMonth() + 1}/${dt.getDate()}`;
-		});
+		const labels = aggregated.map((d) => formatPeriodLabel(d.date, period));
 
 		chart = new Chart(canvas, {
 			type: 'line',
@@ -26,7 +28,7 @@
 				datasets: [
 					{
 						label: 'Messages',
-						data: data.map((d) => d.messageCount),
+						data: aggregated.map((d) => d.messageCount),
 						borderColor: theme.accent,
 						backgroundColor: theme.accent + '18',
 						fill: true,
@@ -36,7 +38,7 @@
 					},
 					{
 						label: 'Tool Calls',
-						data: data.map((d) => d.toolCallCount),
+						data: aggregated.map((d) => d.toolCallCount),
 						borderColor: theme.success,
 						backgroundColor: theme.success + '0d',
 						fill: true,
@@ -71,7 +73,7 @@
 </script>
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-	<h3 class="text-sm font-semibold text-text-secondary mb-4">Daily Activity</h3>
+	<h3 class="text-sm font-semibold text-text-secondary mb-4">{periodLabel(period)} Activity</h3>
 	<div class="h-64">
 		<canvas bind:this={canvas}></canvas>
 	</div>

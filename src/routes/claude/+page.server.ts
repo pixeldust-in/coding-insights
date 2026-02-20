@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import type { DailyProjectActivity, ProjectTokenUsage } from '$lib/server/types.js';
+import type { DailyProjectActivity, DailyProjectTokens, ProjectTokenUsage } from '$lib/server/types.js';
 import { readStatsCache } from '$lib/server/readers/stats.js';
 import { readAllSessionMeta } from '$lib/server/readers/session-meta.js';
 import { shortName } from '$lib/server/parsers/path-codec.js';
@@ -14,6 +14,7 @@ export const load: PageServerLoad = async () => {
 
 	// Per-project aggregation
 	const projectDailyMap = new Map<string, Map<string, number>>(); // date -> (project -> messages)
+	const projectDailyTokenMap = new Map<string, Map<string, { input: number; output: number }>>(); // date -> (project -> tokens)
 	const projectTokenMap = new Map<string, { input: number; output: number }>(); // project -> tokens
 	const projectTotalMessages = new Map<string, number>(); // project -> total messages
 
@@ -34,6 +35,13 @@ export const load: PageServerLoad = async () => {
 			if (!projectDailyMap.has(date)) projectDailyMap.set(date, new Map());
 			const dayMap = projectDailyMap.get(date)!;
 			dayMap.set(project, (dayMap.get(project) || 0) + messages);
+
+			if (!projectDailyTokenMap.has(date)) projectDailyTokenMap.set(date, new Map());
+			const dayTokenMap = projectDailyTokenMap.get(date)!;
+			const dayTokens = dayTokenMap.get(project) || { input: 0, output: 0 };
+			dayTokens.input += meta.input_tokens || 0;
+			dayTokens.output += meta.output_tokens || 0;
+			dayTokenMap.set(project, dayTokens);
 		}
 
 		const tokens = projectTokenMap.get(project) || { input: 0, output: 0 };
@@ -59,6 +67,19 @@ export const load: PageServerLoad = async () => {
 			for (const [project, count] of dayMap) {
 				const resolved = resolveProject(project);
 				byProject[resolved] = (byProject[resolved] || 0) + count;
+			}
+			return { date, byProject };
+		})
+		.sort((a, b) => a.date.localeCompare(b.date));
+
+	const dailyProjectTokens: DailyProjectTokens[] = Array.from(projectDailyTokenMap.entries())
+		.map(([date, dayMap]) => {
+			const byProject: Record<string, { input: number; output: number }> = {};
+			for (const [project, tokens] of dayMap) {
+				const resolved = resolveProject(project);
+				if (!byProject[resolved]) byProject[resolved] = { input: 0, output: 0 };
+				byProject[resolved].input += tokens.input;
+				byProject[resolved].output += tokens.output;
 			}
 			return { date, byProject };
 		})
@@ -98,6 +119,7 @@ export const load: PageServerLoad = async () => {
 		totalTokens,
 		activeDays,
 		dailyProjectActivity,
+		dailyProjectTokens,
 		projectTokenUsage
 	};
 };

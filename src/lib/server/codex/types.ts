@@ -1,4 +1,4 @@
-import type { DailyProjectActivity, ProjectTokenUsage } from '../types.js';
+import type { DailyProjectActivity, DailyProjectTokens, ProjectTokenUsage } from '../types.js';
 
 export interface CodexSessionMeta {
 	id: string;
@@ -46,10 +46,12 @@ export interface CodexDashboardStats {
 	totalTokens: number;
 	activeDays: number;
 	dailyActivity: { date: string; sessionCount: number; messageCount: number }[];
+	dailyModelTokens: { date: string; tokensByModel: Record<string, number> }[];
 	hourCounts: Record<string, number>;
 	functionCallCounts: Record<string, number>;
 	modelTokens: Record<string, { input: number; output: number; reasoning: number }>;
 	firstSessionDate: string;
 	dailyProjectActivity: DailyProjectActivity[];
+	dailyProjectTokens: DailyProjectTokens[];
 	projectTokenUsage: ProjectTokenUsage[];
 }

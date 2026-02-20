@@ -2,12 +2,17 @@
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
 	import { getChartTheme, getChartPalette } from '$utils/chart-theme.js';
+	import { type TimePeriod, periodLabel, aggregateModelTokens, formatPeriodLabel } from '$utils/time-period.js';
 
 	let {
-		data
+		data,
+		period = 'day'
 	}: {
 		data: { date: string; tokensByModel: Record<string, number> }[];
+		period?: TimePeriod;
 	} = $props();
+
+	let aggregated = $derived(aggregateModelTokens(data, period));
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
@@ -16,16 +21,13 @@
 		const theme = getChartTheme(canvas);
 		const palette = getChartPalette(canvas);
 		const models = new Set<string>();
-		data.forEach((d) => Object.keys(d.tokensByModel).forEach((m) => models.add(m)));
+		aggregated.forEach((d) => Object.keys(d.tokensByModel).forEach((m) => models.add(m)));
 
-		const labels = data.map((d) => {
-			const dt = new Date(d.date);
-			return `${dt.getMonth() + 1}/${dt.getDate()}`;
-		});
+		const labels = aggregated.map((d) => formatPeriodLabel(d.date, period));
 
 		const datasets = Array.from(models).map((model, i) => ({
 			label: model.replace('claude-', '').replace(/-\d{8,}$/, ''),
-			data: data.map((d) => d.tokensByModel[model] || 0),
+			data: aggregated.map((d) => d.tokensByModel[model] || 0),
 			borderColor: palette[i % palette.length],
 			backgroundColor: palette[i % palette.length] + '20',
 			fill: true,
@@ -71,7 +73,7 @@
 </script>
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-	<h3 class="text-sm font-semibold text-text-secondary mb-4">Token Usage by Model</h3>
+	<h3 class="text-sm font-semibold text-text-secondary mb-4">{periodLabel(period)} Token Usage by Model</h3>
 	<div class="h-64">
 		<canvas bind:this={canvas}></canvas>
 	</div>

@@ -3,13 +3,17 @@
 	import UsagePanel from '$components/analytics/UsagePanel.svelte';
 	import SummaryCard from '$components/analytics/SummaryCard.svelte';
 	import ActivityChart from '$components/analytics/ActivityChart.svelte';
+	import TokenChart from '$components/analytics/TokenChart.svelte';
 	import ToolUsageChart from '$components/analytics/ToolUsageChart.svelte';
 	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
 	import ProjectActivityChart from '$components/analytics/ProjectActivityChart.svelte';
 	import ProjectTokenChart from '$components/analytics/ProjectTokenChart.svelte';
+	import TerminalSelect from '$components/shared/TerminalSelect.svelte';
 	import { formatNumber, formatTokens } from '$utils/format.js';
+	import { type TimePeriod, periodOptions } from '$utils/time-period.js';
 
 	let { data } = $props();
+	let period = $state<TimePeriod>('week');
 
 	// Map codex daily activity to the shape ActivityChart expects
 	let activityData = $derived(
@@ -54,45 +58,58 @@
 		/>
 	</div>
 
-	<!-- Charts -->
+	<!-- Period Toggle -->
+	<div class="flex items-center gap-3">
+		<span class="text-xs text-text-muted uppercase tracking-wider">Period</span>
+		<TerminalSelect bind:value={period} options={periodOptions} />
+	</div>
+
+	<!-- Charts Row 1 -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		<ActivityChart data={activityData} />
-		<div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-			<h3 class="text-sm font-semibold text-text-secondary mb-4">Model Usage</h3>
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm">
-					<thead>
-						<tr class="text-left text-text-muted border-b border-border-subtle">
-							<th class="pb-2 font-medium">Model</th>
-							<th class="pb-2 font-medium text-right">Input Tokens</th>
-							<th class="pb-2 font-medium text-right">Output Tokens</th>
-							<th class="pb-2 font-medium text-right">Reasoning</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each Object.entries(data.stats.modelTokens) as [model, usage]}
-							<tr class="border-b border-border-subtle/50">
-								<td class="py-2 font-mono text-xs text-accent">{model}</td>
-								<td class="py-2 text-right tabular-nums">{formatTokens(usage.input)}</td>
-								<td class="py-2 text-right tabular-nums">{formatTokens(usage.output)}</td>
-								<td class="py-2 text-right tabular-nums">{formatTokens(usage.reasoning)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</div>
+		{#key period}
+			<ActivityChart data={activityData} {period} />
+			<TokenChart data={data.stats.dailyModelTokens} {period} />
+		{/key}
 	</div>
 
 	<!-- Project Charts -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		<ProjectActivityChart data={data.stats.dailyProjectActivity} />
-		<ProjectTokenChart data={data.stats.projectTokenUsage} />
+		{#key period}
+			<ProjectActivityChart data={data.stats.dailyProjectActivity} {period} />
+			<ProjectTokenChart data={data.stats.dailyProjectTokens} {period} />
+		{/key}
 	</div>
 
 	<!-- Charts Row 2 -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
 		<ToolUsageChart data={data.stats.functionCallCounts} />
 		<HourHeatmap data={data.stats.hourCounts} />
+	</div>
+
+	<!-- Model Usage Table -->
+	<div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
+		<h3 class="text-sm font-semibold text-text-secondary mb-4">Model Usage</h3>
+		<div class="overflow-x-auto">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="text-left text-text-muted border-b border-border-subtle">
+						<th class="pb-2 font-medium">Model</th>
+						<th class="pb-2 font-medium text-right">Input Tokens</th>
+						<th class="pb-2 font-medium text-right">Output Tokens</th>
+						<th class="pb-2 font-medium text-right">Reasoning</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each Object.entries(data.stats.modelTokens) as [model, usage]}
+						<tr class="border-b border-border-subtle/50">
+							<td class="py-2 font-mono text-xs text-accent">{model}</td>
+							<td class="py-2 text-right tabular-nums">{formatTokens(usage.input)}</td>
+							<td class="py-2 text-right tabular-nums">{formatTokens(usage.output)}</td>
+							<td class="py-2 text-right tabular-nums">{formatTokens(usage.reasoning)}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>

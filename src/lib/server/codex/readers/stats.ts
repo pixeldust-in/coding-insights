@@ -2,7 +2,7 @@ import { listAllCodexSessions, findSessionFile } from './sessions.js';
 import { fullScanCodexSession } from '../parsers/codex-jsonl.js';
 import { shortName } from '../../parsers/path-codec.js';
 import type { CodexDashboardStats } from '../types.js';
-import type { DailyProjectActivity, ProjectTokenUsage } from '../../types.js';
+import type { DailyProjectActivity, DailyProjectTokens, ProjectTokenUsage } from '../../types.js';
 
 let cachedStats: CodexDashboardStats | null = null;
 let cacheTime = 0;
@@ -22,9 +22,11 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 	const hourCounts: Record<string, number> = {};
 	const functionCallCounts: Record<string, number> = {};
 	const modelTokens: Record<string, { input: number; output: number; reasoning: number }> = {};
+	const dailyModelTokenMap = new Map<string, Map<string, number>>(); // date -> (model -> totalTokens)
 
 	// Per-project tracking
 	const projectDailyMap = new Map<string, Map<string, number>>(); // date -> (project -> messages)
+	const projectDailyTokenMap = new Map<string, Map<string, { input: number; output: number }>>(); // date -> (project -> tokens)
 	const projectTokenMap = new Map<string, { input: number; output: number }>(); // project -> tokens
 	const projectTotalMessages = new Map<string, number>(); // project -> total messages
 
@@ -63,11 +65,23 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		modelTokens[model].output += scan.totalOutputTokens;
 		modelTokens[model].reasoning += scan.totalReasoningTokens;
 
+		// Daily model tokens
+		if (!dailyModelTokenMap.has(date)) dailyModelTokenMap.set(date, new Map());
+		const dayModelMap = dailyModelTokenMap.get(date)!;
+		dayModelMap.set(model, (dayModelMap.get(model) || 0) + scan.totalInputTokens + scan.totalOutputTokens);
+
 		// Per-project stats
 		const project = session.cwd ? shortName(session.cwd) : 'Unknown';
 		if (!projectDailyMap.has(date)) projectDailyMap.set(date, new Map());
 		const dayMap = projectDailyMap.get(date)!;
 		dayMap.set(project, (dayMap.get(project) || 0) + scan.messageCount);
+
+		if (!projectDailyTokenMap.has(date)) projectDailyTokenMap.set(date, new Map());
+		const dayTokenMap = projectDailyTokenMap.get(date)!;
+		const dayTokens = dayTokenMap.get(project) || { input: 0, output: 0 };
+		dayTokens.input += scan.totalInputTokens;
+		dayTokens.output += scan.totalOutputTokens;
+		dayTokenMap.set(project, dayTokens);
 
 		const tokens = projectTokenMap.get(project) || { input: 0, output: 0 };
 		tokens.input += scan.totalInputTokens;
@@ -97,6 +111,19 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		})
 		.sort((a, b) => a.date.localeCompare(b.date));
 
+	const dailyProjectTokens: DailyProjectTokens[] = Array.from(projectDailyTokenMap.entries())
+		.map(([date, dayMap]) => {
+			const byProject: Record<string, { input: number; output: number }> = {};
+			for (const [project, tokens] of dayMap) {
+				const resolved = resolveProject(project);
+				if (!byProject[resolved]) byProject[resolved] = { input: 0, output: 0 };
+				byProject[resolved].input += tokens.input;
+				byProject[resolved].output += tokens.output;
+			}
+			return { date, byProject };
+		})
+		.sort((a, b) => a.date.localeCompare(b.date));
+
 	const collapsedTokens = new Map<string, { input: number; output: number }>();
 	for (const [project, tokens] of projectTokenMap) {
 		const resolved = resolveProject(project);
@@ -115,6 +142,16 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		}))
 		.sort((a, b) => b.totalTokens - a.totalTokens);
 
+	const dailyModelTokens = Array.from(dailyModelTokenMap.entries())
+		.map(([date, modelMap]) => {
+			const tokensByModel: Record<string, number> = {};
+			for (const [model, total] of modelMap) {
+				tokensByModel[model] = total;
+			}
+			return { date, tokensByModel };
+		})
+		.sort((a, b) => a.date.localeCompare(b.date));
+
 	const dailyActivity = Array.from(dailyMap.entries())
 		.map(([date, data]) => ({ date, ...data }))
 		.sort((a, b) => a.date.localeCompare(b.date));
@@ -129,11 +166,13 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		totalTokens,
 		activeDays: dailyMap.size,
 		dailyActivity,
+		dailyModelTokens,
 		hourCounts,
 		functionCallCounts,
 		modelTokens,
 		firstSessionDate,
 		dailyProjectActivity,
+		dailyProjectTokens,
 		projectTokenUsage
 	};
 
