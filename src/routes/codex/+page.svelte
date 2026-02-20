@@ -4,6 +4,8 @@
 	import ActivityChart from '$components/analytics/ActivityChart.svelte';
 	import ToolUsageChart from '$components/analytics/ToolUsageChart.svelte';
 	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
+	import ProjectActivityChart from '$components/analytics/ProjectActivityChart.svelte';
+	import ProjectTokenChart from '$components/analytics/ProjectTokenChart.svelte';
 	import { formatNumber, formatTokens } from '$utils/format.js';
 
 	let { data } = $props();
@@ -76,6 +78,12 @@
 				</table>
 			</div>
 		</div>
+	</div>
+
+	<!-- Project Charts -->
+	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+		<ProjectActivityChart data={data.stats.dailyProjectActivity} />
+		<ProjectTokenChart data={data.stats.projectTokenUsage} />
 	</div>
 
 	<!-- Charts Row 2 -->

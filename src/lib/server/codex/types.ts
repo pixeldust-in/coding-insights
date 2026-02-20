@@ -1,3 +1,5 @@
+import type { DailyProjectActivity, ProjectTokenUsage } from '../types.js';
+
 export interface CodexSessionMeta {
 	id: string;
 	timestamp: string;
@@ -48,4 +50,6 @@ export interface CodexDashboardStats {
 	functionCallCounts: Record<string, number>;
 	modelTokens: Record<string, { input: number; output: number; reasoning: number }>;
 	firstSessionDate: string;
+	dailyProjectActivity: DailyProjectActivity[];
+	projectTokenUsage: ProjectTokenUsage[];
 }

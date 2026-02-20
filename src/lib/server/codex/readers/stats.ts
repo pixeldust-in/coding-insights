@@ -1,6 +1,8 @@
 import { listAllCodexSessions, findSessionFile } from './sessions.js';
 import { fullScanCodexSession } from '../parsers/codex-jsonl.js';
+import { shortName } from '../../parsers/path-codec.js';
 import type { CodexDashboardStats } from '../types.js';
+import type { DailyProjectActivity, ProjectTokenUsage } from '../../types.js';
 
 let cachedStats: CodexDashboardStats | null = null;
 let cacheTime = 0;
@@ -20,6 +22,11 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 	const hourCounts: Record<string, number> = {};
 	const functionCallCounts: Record<string, number> = {};
 	const modelTokens: Record<string, { input: number; output: number; reasoning: number }> = {};
+
+	// Per-project tracking
+	const projectDailyMap = new Map<string, Map<string, number>>(); // date -> (project -> messages)
+	const projectTokenMap = new Map<string, { input: number; output: number }>(); // project -> tokens
+	const projectTotalMessages = new Map<string, number>(); // project -> total messages
 
 	for (const session of sessions) {
 		const filePath = findSessionFile(session.sessionId);
@@ -55,7 +62,58 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		modelTokens[model].input += scan.totalInputTokens;
 		modelTokens[model].output += scan.totalOutputTokens;
 		modelTokens[model].reasoning += scan.totalReasoningTokens;
+
+		// Per-project stats
+		const project = session.cwd ? shortName(session.cwd) : 'Unknown';
+		if (!projectDailyMap.has(date)) projectDailyMap.set(date, new Map());
+		const dayMap = projectDailyMap.get(date)!;
+		dayMap.set(project, (dayMap.get(project) || 0) + scan.messageCount);
+
+		const tokens = projectTokenMap.get(project) || { input: 0, output: 0 };
+		tokens.input += scan.totalInputTokens;
+		tokens.output += scan.totalOutputTokens;
+		projectTokenMap.set(project, tokens);
+
+		projectTotalMessages.set(project, (projectTotalMessages.get(project) || 0) + scan.messageCount);
 	}
+
+	// Top 8 projects by total messages, rest collapsed into "Other"
+	const sortedProjects = Array.from(projectTotalMessages.entries())
+		.sort((a, b) => b[1] - a[1]);
+	const topProjects = new Set(sortedProjects.slice(0, 8).map(([p]) => p));
+
+	function resolveProject(p: string): string {
+		return topProjects.has(p) ? p : 'Other';
+	}
+
+	const dailyProjectActivity: DailyProjectActivity[] = Array.from(projectDailyMap.entries())
+		.map(([date, dayMap]) => {
+			const byProject: Record<string, number> = {};
+			for (const [project, count] of dayMap) {
+				const resolved = resolveProject(project);
+				byProject[resolved] = (byProject[resolved] || 0) + count;
+			}
+			return { date, byProject };
+		})
+		.sort((a, b) => a.date.localeCompare(b.date));
+
+	const collapsedTokens = new Map<string, { input: number; output: number }>();
+	for (const [project, tokens] of projectTokenMap) {
+		const resolved = resolveProject(project);
+		const existing = collapsedTokens.get(resolved) || { input: 0, output: 0 };
+		existing.input += tokens.input;
+		existing.output += tokens.output;
+		collapsedTokens.set(resolved, existing);
+	}
+
+	const projectTokenUsage: ProjectTokenUsage[] = Array.from(collapsedTokens.entries())
+		.map(([project, tokens]) => ({
+			project,
+			totalTokens: tokens.input + tokens.output,
+			inputTokens: tokens.input,
+			outputTokens: tokens.output
+		}))
+		.sort((a, b) => b.totalTokens - a.totalTokens);
 
 	const dailyActivity = Array.from(dailyMap.entries())
 		.map(([date, data]) => ({ date, ...data }))
@@ -74,7 +132,9 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		hourCounts,
 		functionCallCounts,
 		modelTokens,
-		firstSessionDate
+		firstSessionDate,
+		dailyProjectActivity,
+		projectTokenUsage
 	};
 
 	cachedStats = stats;

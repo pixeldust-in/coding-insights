@@ -1,3 +1,16 @@
+// Project-level analytics
+export interface DailyProjectActivity {
+	date: string;
+	byProject: Record<string, number>; // projectDisplayName -> messageCount
+}
+
+export interface ProjectTokenUsage {
+	project: string;
+	totalTokens: number;
+	inputTokens: number;
+	outputTokens: number;
+}
+
 // Stats Cache
 export interface DailyActivity {
 	date: string;
