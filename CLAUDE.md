@@ -20,6 +20,10 @@ npm run check      # Type-check with svelte-check
 - **Server-side only data loading** — all `~/.claude/` file reads happen in `+page.server.ts` loaders via readers in `$lib/server/readers/`
 - **No database, no API keys, no env vars** — everything reads from the local filesystem
 
+## Tool Usage
+
+- **Do NOT use Chrome DevTools MCP or Playwright MCP** tools unless explicitly told to do so by the user. For testing, use the dev server and type-checking instead.
+
 ## Key Conventions
 
 ### Theming

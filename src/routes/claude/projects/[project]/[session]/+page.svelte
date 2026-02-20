@@ -14,7 +14,7 @@
 	async function loadMore() {
 		const offset = allMessages.length;
 		const res = await fetch(
-			`/api/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/messages?offset=${offset}&limit=50`
+			`/api/claude/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/messages?offset=${offset}&limit=50`
 		);
 		const json = await res.json();
 		extraMessages = [...extraMessages, ...json.messages];
@@ -23,8 +23,8 @@
 
 <Header
 	breadcrumbs={[
-		{ label: 'Projects', href: '/projects' },
-		{ label: data.displayName, href: `/projects/${encodeURIComponent(data.projectDir)}` },
+		{ label: 'Projects', href: '/claude/projects' },
+		{ label: data.displayName, href: `/claude/projects/${encodeURIComponent(data.projectDir)}` },
 		{ label: data.meta?.summary || data.sessionId.slice(0, 8) }
 	]}
 />

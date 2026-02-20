@@ -8,18 +8,16 @@
 		icon: string;
 	}
 
-	const navItems: NavItem[] = [
-		{ label: 'Dashboard', href: '/', icon: '◈' },
-		{ label: 'Projects', href: '/projects', icon: '◫' },
-		{ label: 'Commands', href: '/commands', icon: '⌘' },
-		{ label: 'Skills', href: '/skills', icon: '✦' },
-		{ label: 'Settings', href: '/settings', icon: '⚙' }
-	];
+	let { tool, navItems, title }: {
+		tool: 'claude' | 'codex';
+		navItems: NavItem[];
+		title: string;
+	} = $props();
 
 	let collapsed = $state(false);
 
 	function isActive(href: string): boolean {
-		if (href === '/') return page.url.pathname === '/';
+		if (href === '/claude' || href === '/codex') return page.url.pathname === href;
 		return page.url.pathname.startsWith(href);
 	}
 </script>
@@ -29,12 +27,14 @@
 >
 	<div class="flex items-center gap-3 px-4 h-14 border-b border-border-subtle">
 		{#if !collapsed}
-			<div class="flex items-center gap-2.5">
-				<span class="text-accent text-lg font-bold">✦</span>
-				<span class="text-sm font-semibold tracking-tight">Claude Dashboard</span>
-			</div>
+			<a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+				<span class="text-accent text-lg font-bold">{tool === 'claude' ? '✦' : '◆'}</span>
+				<span class="text-sm font-semibold tracking-tight">{title}</span>
+			</a>
 		{:else}
-			<span class="text-accent text-lg font-bold mx-auto">✦</span>
+			<a href="/" class="mx-auto hover:opacity-80 transition-opacity">
+				<span class="text-accent text-lg font-bold">{tool === 'claude' ? '✦' : '◆'}</span>
+			</a>
 		{/if}
 	</div>
 

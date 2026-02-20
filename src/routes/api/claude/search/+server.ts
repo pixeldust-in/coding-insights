@@ -33,7 +33,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				title: meta.first_prompt || meta.summary || meta.session_id,
 				subtitle: meta.summary || meta.project_path,
 				href: projectDir
-					? `/projects/${encodeURIComponent(projectDir)}/${meta.session_id}`
+					? `/claude/projects/${encodeURIComponent(projectDir)}/${meta.session_id}`
 					: '#'
 			});
 		}
@@ -50,7 +50,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				type: 'command',
 				title: `/${cmd.name}`,
 				subtitle: cmd.description,
-				href: '/commands'
+				href: '/claude/commands'
 			});
 		}
 	}
@@ -63,7 +63,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				type: 'project',
 				title: p.decodedPath.split('/').slice(-2).join('/'),
 				subtitle: `${p.sessionCount} sessions`,
-				href: `/projects/${encodeURIComponent(p.dirName)}`
+				href: `/claude/projects/${encodeURIComponent(p.dirName)}`
 			});
 		}
 	}

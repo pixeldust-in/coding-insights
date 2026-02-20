@@ -32,7 +32,7 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 		{#each filtered() as project}
 			<a
-				href="/projects/{encodeURIComponent(project.dirName)}"
+				href="/claude/projects/{encodeURIComponent(project.dirName)}"
 				class="bg-surface border border-border-subtle rounded-xl p-5 hover:border-accent/50 transition-all group card-elevated"
 			>
 				<div class="flex items-start justify-between">

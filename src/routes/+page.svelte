@@ -1,84 +1,71 @@
 <script lang="ts">
-	import Header from '$components/layout/Header.svelte';
-	import SummaryCard from '$components/analytics/SummaryCard.svelte';
-	import ActivityChart from '$components/analytics/ActivityChart.svelte';
-	import TokenChart from '$components/analytics/TokenChart.svelte';
-	import ToolUsageChart from '$components/analytics/ToolUsageChart.svelte';
-	import LanguageChart from '$components/analytics/LanguageChart.svelte';
-	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
-	import { formatNumber, formatTokens } from '$utils/format.js';
+	import ThemeToggle from '$components/layout/ThemeToggle.svelte';
+	import ClaudeLogo from '$components/shared/ClaudeLogo.svelte';
+	import OpenAILogo from '$components/shared/OpenAILogo.svelte';
 
 	let { data } = $props();
 </script>
 
-<Header title="Dashboard" />
-
-<div class="p-6 space-y-6">
-	<!-- Summary Cards -->
-	<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-		<SummaryCard
-			icon="◈"
-			label="Total Sessions"
-			value={formatNumber(data.stats.totalSessions)}
-			subtitle="Since {new Date(data.stats.firstSessionDate).toLocaleDateString()}"
-		/>
-		<SummaryCard
-			icon="✉"
-			label="Total Messages"
-			value={formatNumber(data.stats.totalMessages)}
-		/>
-		<SummaryCard
-			icon="◎"
-			label="Total Tokens"
-			value={formatTokens(data.totalTokens)}
-			subtitle="Across all models"
-		/>
-		<SummaryCard
-			icon="◆"
-			label="Active Days"
-			value={data.activeDays}
-		/>
+<div class="min-h-screen bg-bg flex flex-col items-center justify-center relative">
+	<!-- Theme Toggle -->
+	<div class="absolute top-4 right-4">
+		<ThemeToggle />
 	</div>
 
-	<!-- Charts Row 1 -->
-	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		<ActivityChart data={data.stats.dailyActivity} />
-		<TokenChart data={data.stats.dailyModelTokens} />
+	<!-- Content -->
+	<div class="text-center mb-12">
+		<h1 class="text-3xl font-bold tracking-tight text-text">Choose your poison</h1>
+		<p class="text-text-muted text-sm mt-2">Select a tool to explore its usage data</p>
 	</div>
 
-	<!-- Charts Row 2 -->
-	<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-		<ToolUsageChart data={data.toolCounts} />
-		<LanguageChart data={data.languages} />
-		<HourHeatmap data={data.stats.hourCounts} />
+	<div class="flex flex-col sm:flex-row gap-6">
+		<!-- Claude Card -->
+		<a
+			href={data.claudeAvailable ? '/claude' : undefined}
+			class="group bg-surface border border-border-subtle rounded-xl p-8 card-elevated w-72 text-center transition-all
+				{data.claudeAvailable
+					? 'hover:border-accent/50 cursor-pointer'
+					: 'opacity-40 pointer-events-none'}"
+		>
+			<div class="flex justify-center mb-5 text-accent group-hover:scale-110 transition-transform">
+				<ClaudeLogo size={56} />
+			</div>
+			<h2 class="text-lg font-semibold text-text">Claude Code</h2>
+			<p class="text-xs text-text-muted mt-2">Anthropic's coding assistant</p>
+			{#if !data.claudeAvailable}
+				<p class="text-xs text-error mt-3">~/.claude/ not found</p>
+			{:else}
+				<div class="mt-4 flex items-center justify-center gap-1.5 text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+					<span>Open dashboard</span>
+					<span class="font-mono">-&gt;</span>
+				</div>
+			{/if}
+		</a>
+
+		<!-- Codex Card -->
+		<a
+			href={data.codexAvailable ? '/codex' : undefined}
+			class="group bg-surface border border-border-subtle rounded-xl p-8 card-elevated w-72 text-center transition-all
+				{data.codexAvailable
+					? 'hover:border-accent/50 cursor-pointer'
+					: 'opacity-40 pointer-events-none'}"
+		>
+			<div class="flex justify-center mb-5 text-accent group-hover:scale-110 transition-transform">
+				<OpenAILogo size={56} />
+			</div>
+			<h2 class="text-lg font-semibold text-text">Codex CLI</h2>
+			<p class="text-xs text-text-muted mt-2">OpenAI's coding agent</p>
+			{#if !data.codexAvailable}
+				<p class="text-xs text-error mt-3">~/.codex/ not found</p>
+			{:else}
+				<div class="mt-4 flex items-center justify-center gap-1.5 text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+					<span>Open dashboard</span>
+					<span class="font-mono">-&gt;</span>
+				</div>
+			{/if}
+		</a>
 	</div>
 
-	<!-- Model Usage Table -->
-	<div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-		<h3 class="text-sm font-medium text-text-secondary mb-4">Model Usage</h3>
-		<div class="overflow-x-auto">
-			<table class="w-full text-sm">
-				<thead>
-					<tr class="text-left text-text-muted border-b border-border-subtle">
-						<th class="pb-2 font-medium">Model</th>
-						<th class="pb-2 font-medium text-right">Input Tokens</th>
-						<th class="pb-2 font-medium text-right">Output Tokens</th>
-						<th class="pb-2 font-medium text-right">Cache Read</th>
-						<th class="pb-2 font-medium text-right">Cache Write</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each Object.entries(data.stats.modelUsage) as [model, usage]}
-						<tr class="border-b border-border-subtle/50">
-							<td class="py-2 font-mono text-xs text-accent">{model}</td>
-							<td class="py-2 text-right tabular-nums">{formatTokens(usage.inputTokens)}</td>
-							<td class="py-2 text-right tabular-nums">{formatTokens(usage.outputTokens)}</td>
-							<td class="py-2 text-right tabular-nums">{formatTokens(usage.cacheReadInputTokens)}</td>
-							<td class="py-2 text-right tabular-nums">{formatTokens(usage.cacheCreationInputTokens)}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	</div>
+	<!-- Footer -->
+	<p class="text-[10px] text-text-muted mt-16 font-mono">Coding Insights &middot; read-only dashboard</p>
 </div>

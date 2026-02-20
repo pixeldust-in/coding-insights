@@ -8,7 +8,7 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	server: {
 		fs: {
-			allow: [join(homedir(), '.claude')]
+			allow: [join(homedir(), '.claude'), join(homedir(), '.codex')]
 		}
 	}
 });

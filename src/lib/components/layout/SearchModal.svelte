@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	interface SearchResult {
 		type: 'session' | 'command' | 'project';
@@ -14,6 +15,12 @@
 	let selectedIndex = $state(0);
 	let loading = $state(false);
 	let debounceTimer: ReturnType<typeof setTimeout>;
+
+	let activeTool = $derived(
+		page.url.pathname.startsWith('/claude') ? 'claude' :
+		page.url.pathname.startsWith('/codex') ? 'codex' :
+		null
+	);
 
 	function handleKeydown(e: KeyboardEvent) {
 		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -49,13 +56,13 @@
 	}
 
 	async function search(q: string) {
-		if (q.length < 2) {
+		if (q.length < 2 || !activeTool) {
 			results = [];
 			return;
 		}
 		loading = true;
 		try {
-			const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+			const res = await fetch(`/api/${activeTool}/search?q=${encodeURIComponent(q)}`);
 			const data = await res.json();
 			results = data.results;
 			selectedIndex = 0;
@@ -99,7 +106,7 @@
 					type="text"
 					bind:value={query}
 					onkeydown={handleInputKeydown}
-					placeholder="Search sessions, commands, projects..."
+					placeholder={activeTool ? `Search ${activeTool} sessions, commands, projects...` : 'Search...'}
 					class="flex-1 bg-transparent py-3 text-sm text-text font-mono placeholder:text-text-muted focus:outline-none"
 					autofocus
 				/>

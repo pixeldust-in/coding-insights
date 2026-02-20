@@ -6,7 +6,7 @@
 </script>
 
 <Header
-	breadcrumbs={[{ label: 'Skills', href: '/skills' }, { label: data.skill.name }]}
+	breadcrumbs={[{ label: 'Skills', href: '/claude/skills' }, { label: data.skill.name }]}
 />
 
 <div class="p-6 space-y-4">

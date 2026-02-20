@@ -10,7 +10,7 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		{#each data.skills as skill}
 			<a
-				href="/skills/{skill.dirName}"
+				href="/claude/skills/{skill.dirName}"
 				class="bg-surface border border-border-subtle rounded-xl p-5 hover:border-accent/50 transition-all group card-elevated"
 			>
 				<h3 class="text-sm font-medium group-hover:text-accent transition-colors">
