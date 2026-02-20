@@ -173,6 +173,7 @@ export type ContentBlock =
 export interface TextBlock {
 	type: 'text';
 	text: string;
+	renderedHtml?: string;
 }
 
 export interface ThinkingBlock {

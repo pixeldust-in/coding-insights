@@ -25,12 +25,13 @@
 	breadcrumbs={[
 		{ label: 'Projects', href: '/claude/projects' },
 		{ label: data.displayName, href: `/claude/projects/${encodeURIComponent(data.projectDir)}` },
-		{ label: data.meta?.summary || data.sessionId.slice(0, 8) }
+		{ label: data.meta?.summary || data.firstPrompt || data.sessionId.slice(0, 8) }
 	]}
 />
 
 <div class="p-6 space-y-6">
 	<!-- Session Meta Bar -->
+	{#if data.meta || data.facets}
 	<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
 		<div class="flex flex-wrap items-center gap-3">
 			{#if data.meta}
@@ -100,6 +101,7 @@
 			</p>
 		{/if}
 	</div>
+	{/if}
 
 	<!-- Messages -->
 	<MessageThread messages={allMessages} {totalCount} onLoadMore={loadMore} />

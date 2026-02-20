@@ -77,11 +77,22 @@ export async function streamSessionMessages(
 			}
 			messagesById.set(msgId, msg);
 		} else {
+			// Skip tool_result messages (automatic responses to tool calls)
+			const content = parsed.message.content;
+			if (Array.isArray(content)) {
+				const hasVisibleContent = content.some(
+					(b) => b.type === 'text' && typeof b.text === 'string' && b.text.trim() !== ''
+				);
+				if (!hasVisibleContent) continue;
+			} else if (typeof content === 'string' && !content.trim()) {
+				continue;
+			}
+
 			const id = parsed.uuid ?? `user-${Date.now()}-${Math.random()}`;
 			const msg: ConversationMessage = {
 				id,
 				role: 'user',
-				content: parsed.message.content ?? '',
+				content: content ?? '',
 				timestamp: parsed.timestamp ?? ''
 			};
 			if (!messagesById.has(id)) {

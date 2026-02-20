@@ -10,14 +10,12 @@
 		content,
 		timestamp,
 		model,
-		tokens,
-		renderedHtml
+		tokens
 	}: {
 		content: string | ContentBlock[];
 		timestamp: string;
 		model?: string;
 		tokens?: { input?: number; output?: number };
-		renderedHtml?: string;
 	} = $props();
 
 	function getBlocks(c: string | ContentBlock[]): ContentBlock[] {
@@ -57,9 +55,9 @@
 				{:else if block.type === 'image'}
 					<ImageBlock mediaType={block.source.media_type} data={block.source.data} />
 				{:else if block.type === 'text' && block.text}
-					{#if renderedHtml}
+					{#if block.renderedHtml}
 						<div class="prose text-sm">
-							{@html renderedHtml}
+							{@html block.renderedHtml}
 						</div>
 					{:else}
 						<div class="text-sm text-text whitespace-pre-wrap break-words">
