@@ -139,6 +139,8 @@ export interface SessionListItem {
 	linesAdded?: number;
 	linesRemoved?: number;
 	outcome?: string;
+	projectName?: string;
+	projectDir?: string;
 }
 
 // JSONL Message types

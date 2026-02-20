@@ -49,6 +49,20 @@ export function getProjectDisplayName(dirName: string): string {
 	return shortName(decodeDirName(dirName));
 }
 
+export function listAllSessions(): SessionListItem[] {
+	const projects = listProjects();
+	const all: SessionListItem[] = [];
+	for (const p of projects) {
+		const sessions = listProjectSessions(p.dirName);
+		const name = getProjectDisplayName(p.dirName);
+		for (const s of sessions) {
+			all.push({ ...s, projectName: name, projectDir: p.dirName });
+		}
+	}
+	all.sort((a, b) => (b.modified > a.modified ? 1 : -1));
+	return all;
+}
+
 export function listProjectSessions(dirName: string): SessionListItem[] {
 	const projectDir = join(PROJECTS_DIR, dirName);
 	const indexPath = join(projectDir, 'sessions-index.json');

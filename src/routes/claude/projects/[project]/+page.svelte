@@ -2,12 +2,18 @@
 	import Header from '$components/layout/Header.svelte';
 	import Badge from '$components/shared/Badge.svelte';
 	import TerminalSearch from '$components/shared/TerminalSearch.svelte';
+	import TerminalSelect from '$components/shared/TerminalSelect.svelte';
 	import { relativeTime, formatDuration } from '$utils/format.js';
 
 	let { data } = $props();
 
 	let search = $state('');
 	let sortBy = $state<'date' | 'messages'>('date');
+
+	const sortOptions = [
+		{ value: 'date', label: 'Sort by Date' },
+		{ value: 'messages', label: 'Sort by Messages' }
+	];
 
 	let filtered = $derived(() => {
 		let list = data.sessions;
@@ -38,13 +44,7 @@
 	<!-- Filters -->
 	<div class="flex items-center gap-3">
 		<TerminalSearch bind:value={search} placeholder="Search sessions..." class="w-72" />
-		<select
-			bind:value={sortBy}
-			class="bg-surface border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-secondary focus:outline-none focus:border-accent/50"
-		>
-			<option value="date">Sort by Date</option>
-			<option value="messages">Sort by Messages</option>
-		</select>
+		<TerminalSelect bind:value={sortBy} options={sortOptions} />
 		<span class="text-xs text-text-muted ml-auto">{data.sessions.length} sessions</span>
 	</div>
 
