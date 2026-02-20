@@ -45,6 +45,74 @@ html.light {
 	--color-info: #4A7F9F;
 }
 
+/* ─── Neutral Homepage Theme ─── */
+[data-page="home"] {
+	--color-bg: #111111;
+	--color-surface: #1a1a1a;
+	--color-surface-hover: #222222;
+	--color-border: #2e2e2e;
+	--color-border-subtle: #222222;
+	--color-text: #e5e5e5;
+	--color-text-secondary: #a3a3a3;
+	--color-text-muted: #737373;
+	--color-accent: #a3a3a3;
+}
+
+html.light [data-page="home"] {
+	--color-bg: #f5f5f5;
+	--color-surface: #ffffff;
+	--color-surface-hover: #fafafa;
+	--color-border: #e0e0e0;
+	--color-border-subtle: #ebebeb;
+	--color-text: #171717;
+	--color-text-secondary: #525252;
+	--color-text-muted: #a3a3a3;
+	--color-accent: #525252;
+}
+
+/* ─── Codex CLI Theme (OpenAI-inspired) ─── */
+[data-tool="codex"] {
+	--color-bg: #0d0d0d;
+	--color-surface: #171717;
+	--color-surface-hover: #1e1e1e;
+	--color-surface-raised: #262626;
+	--color-border: #333333;
+	--color-border-subtle: #1e1e1e;
+	--color-text: #ececec;
+	--color-text-secondary: #a1a1a1;
+	--color-text-muted: #6e6e6e;
+	--color-accent: #10A37F;
+	--color-accent-hover: #1abc94;
+	--color-accent-muted: #0d8c6d;
+	--color-accent-glow: rgba(16, 163, 127, 0.15);
+	--color-success: #10A37F;
+	--color-warning: #f0b429;
+	--color-error: #ef4444;
+	--color-info: #3b82f6;
+	--font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+}
+
+html.light [data-tool="codex"] {
+	--color-bg: #f7f7f8;
+	--color-surface: #ffffff;
+	--color-surface-hover: #f0f0f1;
+	--color-surface-raised: #e8e8ea;
+	--color-border: #d9d9e3;
+	--color-border-subtle: #e8e8ea;
+	--color-text: #1a1a1a;
+	--color-text-secondary: #565869;
+	--color-text-muted: #8e8ea0;
+	--color-accent: #10A37F;
+	--color-accent-hover: #0d8c6d;
+	--color-accent-muted: #1abc94;
+	--color-accent-glow: rgba(16, 163, 127, 0.12);
+	--color-success: #0d8c6d;
+	--color-warning: #d49e0a;
+	--color-error: #dc2626;
+	--color-info: #2563eb;
+}
+
 @layer base {
 	html {
 		background-color: var(--color-bg);
@@ -95,6 +163,15 @@ html.light .card-elevated {
 
 html.light .card-elevated:hover {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+html.light [data-tool="codex"] .card-elevated {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+	border-color: transparent;
+}
+
+html.light [data-tool="codex"] .card-elevated:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
 /* ─── Terminal Search ─── */

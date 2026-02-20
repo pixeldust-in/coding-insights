@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
-	import { getChartTheme, chartPalette } from '$utils/chart-theme.js';
+	import { getChartTheme, getChartPalette } from '$utils/chart-theme.js';
 
 	let { data }: { data: Record<string, number> } = $props();
 
@@ -9,7 +9,8 @@
 	let chart: Chart | null = null;
 
 	onMount(() => {
-		const theme = getChartTheme();
+		const theme = getChartTheme(canvas);
+		const palette = getChartPalette(canvas);
 		const sorted = Object.entries(data)
 			.sort(([, a], [, b]) => b - a)
 			.slice(0, 15);
@@ -21,7 +22,7 @@
 				datasets: [
 					{
 						data: sorted.map(([, v]) => v),
-						backgroundColor: sorted.map((_, i) => chartPalette[i % chartPalette.length] + 'cc'),
+						backgroundColor: sorted.map((_, i) => palette[i % palette.length] + 'cc'),
 						borderRadius: 4,
 						barThickness: 20
 					}

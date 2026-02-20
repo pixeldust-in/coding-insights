@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
-	import { getChartTheme, chartPalette } from '$utils/chart-theme.js';
+	import { getChartTheme, getChartPalette } from '$utils/chart-theme.js';
 
 	let {
 		data
@@ -13,7 +13,8 @@
 	let chart: Chart | null = null;
 
 	onMount(() => {
-		const theme = getChartTheme();
+		const theme = getChartTheme(canvas);
+		const palette = getChartPalette(canvas);
 		const models = new Set<string>();
 		data.forEach((d) => Object.keys(d.tokensByModel).forEach((m) => models.add(m)));
 
@@ -25,8 +26,8 @@
 		const datasets = Array.from(models).map((model, i) => ({
 			label: model.replace('claude-', '').replace(/-\d{8,}$/, ''),
 			data: data.map((d) => d.tokensByModel[model] || 0),
-			borderColor: chartPalette[i % chartPalette.length],
-			backgroundColor: chartPalette[i % chartPalette.length] + '20',
+			borderColor: palette[i % palette.length],
+			backgroundColor: palette[i % palette.length] + '20',
 			fill: true,
 			tension: 0.3,
 			pointRadius: 0,

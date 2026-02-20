@@ -13,7 +13,7 @@
 	];
 </script>
 
-<div class="flex min-h-screen bg-bg">
+<div class="flex min-h-screen bg-bg" data-tool="codex">
 	<Sidebar tool="codex" {navItems} title="Codex CLI" />
 	<main class="flex-1 min-w-0 overflow-auto">
 		{@render children()}

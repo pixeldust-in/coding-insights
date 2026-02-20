@@ -13,7 +13,7 @@
 	let chart: Chart | null = null;
 
 	onMount(() => {
-		const theme = getChartTheme();
+		const theme = getChartTheme(canvas);
 		const labels = data.map((d) => {
 			const dt = new Date(d.date);
 			return `${dt.getMonth() + 1}/${dt.getDate()}`;

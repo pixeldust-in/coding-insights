@@ -12,7 +12,7 @@
 	];
 </script>
 
-<div class="flex min-h-screen bg-bg">
+<div class="flex min-h-screen bg-bg" data-tool="claude">
 	<Sidebar tool="claude" {navItems} title="Claude Code" />
 	<main class="flex-1 min-w-0 overflow-auto">
 		{@render children()}

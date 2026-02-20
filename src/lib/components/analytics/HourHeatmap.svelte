@@ -9,7 +9,7 @@
 	let chart: Chart | null = null;
 
 	onMount(() => {
-		const theme = getChartTheme();
+		const theme = getChartTheme(canvas);
 		const hours = Array.from({ length: 24 }, (_, i) => i);
 		const values = hours.map((h) => data[String(h)] || 0);
 		const labels = hours.map((h) => {
@@ -28,7 +28,7 @@
 						backgroundColor: values.map((v) => {
 							const max = Math.max(...values);
 							const intensity = max > 0 ? v / max : 0;
-							return `rgba(218, 119, 86, ${0.15 + intensity * 0.85})`;
+							return `rgba(${theme.accentRgb}, ${0.15 + intensity * 0.85})`;
 						}),
 						borderRadius: 4,
 						barPercentage: 0.8
