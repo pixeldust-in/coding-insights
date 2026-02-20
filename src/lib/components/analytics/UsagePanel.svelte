@@ -132,7 +132,7 @@
 			{error}
 		</div>
 	{:else if windows.length > 0}
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+		<div class="grid grid-cols-3 gap-4">
 			{#each windows as win}
 				{@const util = Math.round(win.data.utilization)}
 				{@const color = barColor(util)}
