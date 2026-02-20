@@ -94,10 +94,22 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 			// skip
 		}
 
+		// When meta is unavailable, parse JSONL for first prompt and counts
+		let firstPrompt = meta?.first_prompt ?? '';
+		let userCount = meta?.user_message_count ?? 0;
+		let assistantCount = meta?.assistant_message_count ?? 0;
+
+		if (!meta) {
+			const parsed = parseJsonlBasicInfo(filePath);
+			firstPrompt = parsed.firstPrompt;
+			userCount = parsed.userCount;
+			assistantCount = parsed.assistantCount;
+		}
+
 		sessions.push(mergeSessionData(sessionId, {
-			firstPrompt: meta?.first_prompt ?? '',
+			firstPrompt,
 			summary: meta?.summary ?? '',
-			messageCount: meta ? (meta.user_message_count + meta.assistant_message_count) : 0,
+			messageCount: userCount + assistantCount,
 			created: meta?.start_time ?? created,
 			modified,
 			gitBranch: ''
@@ -106,6 +118,57 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 
 	sessions.sort((a, b) => (b.modified > a.modified ? 1 : -1));
 	return sessions;
+}
+
+function parseJsonlBasicInfo(filePath: string): {
+	firstPrompt: string;
+	userCount: number;
+	assistantCount: number;
+} {
+	try {
+		const content = readFileSync(filePath, 'utf-8');
+		let firstPrompt = '';
+		let userCount = 0;
+		let assistantCount = 0;
+
+		for (const line of content.split('\n')) {
+			if (!line.trim()) continue;
+			try {
+				const obj = JSON.parse(line);
+				if (obj.type === 'user') {
+					const msg = obj.message;
+					if (!msg?.content) continue;
+					let text = '';
+					if (typeof msg.content === 'string') {
+						text = msg.content;
+					} else if (Array.isArray(msg.content)) {
+						text = msg.content
+							.filter((b: { type: string }) => b.type === 'text')
+							.map((b: { text: string }) => b.text)
+							.join(' ');
+					}
+					// Skip command/system messages
+					if (
+						text.trim() &&
+						!text.trim().startsWith('<command-name>') &&
+						!text.trim().startsWith('<local-command')
+					) {
+						userCount++;
+						if (!firstPrompt) {
+							firstPrompt = text.trim().slice(0, 200);
+						}
+					}
+				} else if (obj.type === 'assistant') {
+					assistantCount++;
+				}
+			} catch {
+				// skip malformed lines
+			}
+		}
+		return { firstPrompt, userCount, assistantCount };
+	} catch {
+		return { firstPrompt: '', userCount: 0, assistantCount: 0 };
+	}
 }
 
 function mergeSessionData(

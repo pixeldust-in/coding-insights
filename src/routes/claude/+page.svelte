@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
 	import SummaryCard from '$components/analytics/SummaryCard.svelte';
+	import UsagePanel from '$components/analytics/UsagePanel.svelte';
 	import ActivityChart from '$components/analytics/ActivityChart.svelte';
 	import TokenChart from '$components/analytics/TokenChart.svelte';
 	import ToolUsageChart from '$components/analytics/ToolUsageChart.svelte';
@@ -14,6 +15,9 @@
 <Header title="Dashboard" />
 
 <div class="p-6 space-y-6">
+	<!-- Live Usage -->
+	<UsagePanel />
+
 	<!-- Summary Cards -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 		<SummaryCard

@@ -73,8 +73,9 @@
 	}
 
 	$effect(() => {
+		const q = query; // read synchronously so $effect tracks this dependency
 		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => search(query), 200);
+		debounceTimer = setTimeout(() => search(q), 200);
 	});
 
 	const typeIcons: Record<string, string> = {
