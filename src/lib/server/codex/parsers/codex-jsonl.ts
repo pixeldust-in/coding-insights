@@ -306,6 +306,30 @@ export async function scanCodexSessionMeta(filePath: string): Promise<CodexSessi
 	};
 }
 
+const extToLanguage: Record<string, string> = {
+	'.ts': 'TypeScript', '.tsx': 'TypeScript', '.js': 'JavaScript', '.jsx': 'JavaScript',
+	'.py': 'Python', '.rs': 'Rust', '.go': 'Go', '.java': 'Java', '.kt': 'Kotlin',
+	'.rb': 'Ruby', '.php': 'PHP', '.cs': 'C#', '.cpp': 'C++', '.cc': 'C++', '.c': 'C',
+	'.h': 'C', '.hpp': 'C++', '.swift': 'Swift', '.dart': 'Dart', '.scala': 'Scala',
+	'.svelte': 'Svelte', '.vue': 'Vue', '.html': 'HTML', '.css': 'CSS', '.scss': 'SCSS',
+	'.json': 'JSON', '.yaml': 'YAML', '.yml': 'YAML', '.toml': 'TOML',
+	'.md': 'Markdown', '.sql': 'SQL', '.sh': 'Shell', '.bash': 'Shell', '.zsh': 'Shell',
+	'.lua': 'Lua', '.r': 'R', '.ex': 'Elixir', '.exs': 'Elixir', '.zig': 'Zig',
+	'.graphql': 'GraphQL', '.proto': 'Protobuf', '.tf': 'Terraform',
+};
+
+function extractFileExt(args: string): string | null {
+	try {
+		const parsed = JSON.parse(args);
+		const filePath = parsed.path || parsed.file_path || parsed.filename || '';
+		if (!filePath) return null;
+		const match = filePath.match(/(\.[a-zA-Z0-9]+)$/);
+		return match ? match[1].toLowerCase() : null;
+	} catch {
+		return null;
+	}
+}
+
 /**
  * Full scan to get accurate message count and token totals.
  */
@@ -315,6 +339,7 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 	totalOutputTokens: number;
 	totalReasoningTokens: number;
 	functionCallCounts: Record<string, number>;
+	languages: Record<string, number>;
 	hourOfDay: number | null;
 }> {
 	const rl = createInterface({
@@ -327,6 +352,7 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 	let totalOutputTokens = 0;
 	let totalReasoningTokens = 0;
 	const functionCallCounts: Record<string, number> = {};
+	const languages: Record<string, number> = {};
 	let hourOfDay: number | null = null;
 
 	for await (const line of rl) {
@@ -357,6 +383,14 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 			if (payload.type === 'function_call' || payload.type === 'custom_tool_call') {
 				const name = (payload.name as string) || 'unknown';
 				functionCallCounts[name] = (functionCallCounts[name] || 0) + 1;
+
+				const args = payload.arguments as string;
+				if (args) {
+					const ext = extractFileExt(args);
+					if (ext && extToLanguage[ext]) {
+						languages[extToLanguage[ext]] = (languages[extToLanguage[ext]] || 0) + 1;
+					}
+				}
 			}
 		}
 
@@ -380,5 +414,5 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 		}
 	}
 
-	return { messageCount, totalInputTokens, totalOutputTokens, totalReasoningTokens, functionCallCounts, hourOfDay };
+	return { messageCount, totalInputTokens, totalOutputTokens, totalReasoningTokens, functionCallCounts, languages, hourOfDay };
 }

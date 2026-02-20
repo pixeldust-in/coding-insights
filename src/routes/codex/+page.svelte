@@ -5,6 +5,7 @@
 	import ActivityChart from '$components/analytics/ActivityChart.svelte';
 	import TokenChart from '$components/analytics/TokenChart.svelte';
 	import ToolUsageChart from '$components/analytics/ToolUsageChart.svelte';
+	import LanguageChart from '$components/analytics/LanguageChart.svelte';
 	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
 	import ProjectActivityChart from '$components/analytics/ProjectActivityChart.svelte';
 	import ProjectTokenChart from '$components/analytics/ProjectTokenChart.svelte';
@@ -81,8 +82,9 @@
 	</div>
 
 	<!-- Charts Row 2 -->
-	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+	<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
 		<ToolUsageChart data={data.stats.functionCallCounts} />
+		<LanguageChart data={data.stats.languages} />
 		<HourHeatmap data={data.stats.hourCounts} />
 	</div>
 

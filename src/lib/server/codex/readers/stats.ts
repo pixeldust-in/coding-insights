@@ -21,6 +21,7 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 	const dailyMap = new Map<string, { sessionCount: number; messageCount: number }>();
 	const hourCounts: Record<string, number> = {};
 	const functionCallCounts: Record<string, number> = {};
+	const languages: Record<string, number> = {};
 	const modelTokens: Record<string, { input: number; output: number; reasoning: number }> = {};
 	const dailyModelTokenMap = new Map<string, Map<string, number>>(); // date -> (model -> totalTokens)
 
@@ -54,6 +55,11 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		// Function call counts
 		for (const [name, count] of Object.entries(scan.functionCallCounts)) {
 			functionCallCounts[name] = (functionCallCounts[name] || 0) + count;
+		}
+
+		// Languages
+		for (const [lang, count] of Object.entries(scan.languages)) {
+			languages[lang] = (languages[lang] || 0) + count;
 		}
 
 		// Model tokens
@@ -169,6 +175,7 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		dailyModelTokens,
 		hourCounts,
 		functionCallCounts,
+		languages,
 		modelTokens,
 		firstSessionDate,
 		dailyProjectActivity,

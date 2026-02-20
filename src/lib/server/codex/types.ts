@@ -49,6 +49,7 @@ export interface CodexDashboardStats {
 	dailyModelTokens: { date: string; tokensByModel: Record<string, number> }[];
 	hourCounts: Record<string, number>;
 	functionCallCounts: Record<string, number>;
+	languages: Record<string, number>;
 	modelTokens: Record<string, { input: number; output: number; reasoning: number }>;
 	firstSessionDate: string;
 	dailyProjectActivity: DailyProjectActivity[];
