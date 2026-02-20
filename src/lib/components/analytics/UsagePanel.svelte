@@ -22,6 +22,8 @@
 		error?: string;
 	}
 
+	let { apiUrl = '/api/claude/usage' }: { apiUrl?: string } = $props();
+
 	let usage: UsageData | null = $state(null);
 	let loading = $state(true);
 	let error: string | null = $state(null);
@@ -31,7 +33,7 @@
 		spinning = true;
 		error = null;
 		try {
-			const res = await fetch('/api/claude/usage');
+			const res = await fetch(apiUrl);
 			const data = await res.json();
 			if (data.error) {
 				error = data.error;
@@ -84,7 +86,7 @@
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
 	<div class="flex items-center justify-between mb-4">
-		<h3 class="text-sm font-medium text-text-secondary">Live Usage</h3>
+		<h3 class="text-sm font-semibold text-text-secondary">Live Usage</h3>
 		<button
 			onclick={fetchUsage}
 			disabled={spinning}

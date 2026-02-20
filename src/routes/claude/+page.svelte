@@ -67,7 +67,7 @@
 
 	<!-- Model Usage Table -->
 	<div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-		<h3 class="text-sm font-medium text-text-secondary mb-4">Model Usage</h3>
+		<h3 class="text-sm font-semibold text-text-secondary mb-4">Model Usage</h3>
 		<div class="overflow-x-auto">
 			<table class="w-full text-sm">
 				<thead>

@@ -18,7 +18,7 @@
 					{crumb.label}
 				</a>
 			{:else}
-				<span class="text-text">{crumb.label}</span>
+				<span class="text-base text-text font-semibold">{crumb.label}</span>
 			{/if}
 		{/each}
 		{#if breadcrumbs.length === 0 && title}

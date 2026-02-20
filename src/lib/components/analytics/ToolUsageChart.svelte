@@ -51,7 +51,7 @@
 </script>
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-	<h3 class="text-sm font-medium text-text-secondary mb-4">Most Used Tools</h3>
+	<h3 class="text-sm font-semibold text-text-secondary mb-4">Most Used Tools</h3>
 	<div class="h-80">
 		<canvas bind:this={canvas}></canvas>
 	</div>
