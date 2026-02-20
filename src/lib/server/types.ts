@@ -277,8 +277,9 @@ export interface Plugin {
 
 // History
 export interface HistoryEntry {
+	display: string;
+	timestamp: number;
+	project: string;
 	sessionId: string;
-	timestamp: string;
-	type: string;
-	[key: string]: unknown;
+	pastedContents?: Record<string, unknown>;
 }

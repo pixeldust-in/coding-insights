@@ -6,6 +6,7 @@
 	const navItems = [
 		{ label: 'Dashboard', href: '/claude', icon: '◈' },
 		{ label: 'Sessions', href: '/claude/sessions', icon: '◇' },
+		{ label: 'History', href: '/claude/history', icon: '↻' },
 		{ label: 'Projects', href: '/claude/projects', icon: '◫' },
 		{ label: 'Commands', href: '/claude/commands', icon: '⌘' },
 		{ label: 'Skills', href: '/claude/skills', icon: '✦' },
