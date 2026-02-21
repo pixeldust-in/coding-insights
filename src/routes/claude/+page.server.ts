@@ -106,7 +106,8 @@ export const load: PageServerLoad = async () => {
 	// Compute total tokens
 	let totalTokens = 0;
 	for (const usage of Object.values(stats.modelUsage)) {
-		totalTokens += usage.inputTokens + usage.outputTokens;
+		totalTokens += usage.inputTokens + usage.outputTokens
+			+ usage.cacheReadInputTokens + usage.cacheCreationInputTokens;
 	}
 
 	// Count active days

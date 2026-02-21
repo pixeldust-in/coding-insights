@@ -75,6 +75,9 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 			const index: SessionsIndex = JSON.parse(readFileSync(indexPath, 'utf-8'));
 			return index.entries.map((e) => {
 				const meta = metaMap.get(e.sessionId);
+				// Always parse JSONL for active-time duration
+				const jsonlPath = join(projectDir, `${e.sessionId}.jsonl`);
+				const parsed = existsSync(jsonlPath) ? parseJsonlInfo(jsonlPath) : undefined;
 				return mergeSessionData(e.sessionId, {
 					firstPrompt: e.firstPrompt,
 					summary: e.summary,
@@ -82,7 +85,7 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 					created: e.created,
 					modified: e.modified,
 					gitBranch: e.gitBranch
-				}, meta);
+				}, meta, parsed);
 			}).sort((a, b) => (b.modified > a.modified ? 1 : -1));
 		} catch {
 			// Fall through to JSONL scan
@@ -108,17 +111,11 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 			// skip
 		}
 
-		// When meta is unavailable, parse JSONL for first prompt and counts
-		let firstPrompt = meta?.first_prompt ?? '';
-		let userCount = meta?.user_message_count ?? 0;
-		let assistantCount = meta?.assistant_message_count ?? 0;
-
-		if (!meta) {
-			const parsed = parseJsonlBasicInfo(filePath);
-			firstPrompt = parsed.firstPrompt;
-			userCount = parsed.userCount;
-			assistantCount = parsed.assistantCount;
-		}
+		// Parse JSONL for data (used as primary when meta unavailable, fallback otherwise)
+		const parsed = parseJsonlInfo(filePath);
+		const firstPrompt = meta?.first_prompt ?? parsed.firstPrompt;
+		const userCount = meta?.user_message_count ?? parsed.userCount;
+		const assistantCount = meta?.assistant_message_count ?? parsed.assistantCount;
 
 		sessions.push(mergeSessionData(sessionId, {
 			firstPrompt,
@@ -127,28 +124,41 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 			created: meta?.start_time ?? created,
 			modified,
 			gitBranch: ''
-		}, meta));
+		}, meta, parsed));
 	}
 
 	sessions.sort((a, b) => (b.modified > a.modified ? 1 : -1));
 	return sessions;
 }
 
-function parseJsonlBasicInfo(filePath: string): {
+interface ParsedJsonlInfo {
 	firstPrompt: string;
 	userCount: number;
 	assistantCount: number;
-} {
+	inputTokens: number;
+	outputTokens: number;
+	durationMinutes: number;
+}
+
+function parseJsonlInfo(filePath: string): ParsedJsonlInfo {
 	try {
 		const content = readFileSync(filePath, 'utf-8');
 		let firstPrompt = '';
 		let userCount = 0;
 		let assistantCount = 0;
+		let inputTokens = 0;
+		let outputTokens = 0;
+		const timestamps: number[] = [];
 
 		for (const line of content.split('\n')) {
 			if (!line.trim()) continue;
 			try {
 				const obj = JSON.parse(line);
+				const ts = obj.timestamp;
+				if (ts) {
+					const t = new Date(ts).getTime();
+					if (!isNaN(t)) timestamps.push(t);
+				}
 				if (obj.type === 'user') {
 					const msg = obj.message;
 					if (!msg?.content) continue;
@@ -174,14 +184,61 @@ function parseJsonlBasicInfo(filePath: string): {
 					}
 				} else if (obj.type === 'assistant') {
 					assistantCount++;
+					const usage = obj.message?.usage;
+					if (usage) {
+						inputTokens += (usage.input_tokens ?? 0)
+							+ (usage.cache_read_input_tokens ?? 0)
+							+ (usage.cache_creation_input_tokens ?? 0);
+						outputTokens += usage.output_tokens ?? 0;
+					}
 				}
 			} catch {
 				// skip malformed lines
 			}
 		}
-		return { firstPrompt, userCount, assistantCount };
+
+		const durationMinutes = computeActiveDuration(timestamps);
+
+		return { firstPrompt, userCount, assistantCount, inputTokens, outputTokens, durationMinutes };
 	} catch {
-		return { firstPrompt: '', userCount: 0, assistantCount: 0 };
+		return { firstPrompt: '', userCount: 0, assistantCount: 0, inputTokens: 0, outputTokens: 0, durationMinutes: 0 };
+	}
+}
+
+/** Compute active duration from timestamps: sum gaps ≤ 5 min, return minutes */
+export function computeActiveDuration(timestamps: number[]): number {
+	const MAX_GAP_MS = 5 * 60 * 1000;
+	let totalMs = 0;
+	for (let i = 1; i < timestamps.length; i++) {
+		const gap = timestamps[i] - timestamps[i - 1];
+		if (gap <= MAX_GAP_MS) {
+			totalMs += gap;
+		}
+	}
+	return totalMs / 60000;
+}
+
+/** Read a JSONL file and compute active duration (minutes) from its timestamps */
+export function getActiveDurationFromJsonl(filePath: string): number {
+	try {
+		const content = readFileSync(filePath, 'utf-8');
+		const timestamps: number[] = [];
+		for (const line of content.split('\n')) {
+			if (!line.trim()) continue;
+			try {
+				const obj = JSON.parse(line);
+				const ts = obj.timestamp;
+				if (ts) {
+					const t = new Date(ts).getTime();
+					if (!isNaN(t)) timestamps.push(t);
+				}
+			} catch {
+				// skip malformed lines
+			}
+		}
+		return computeActiveDuration(timestamps);
+	} catch {
+		return 0;
 	}
 }
 
@@ -195,7 +252,8 @@ function mergeSessionData(
 		modified: string;
 		gitBranch: string;
 	},
-	meta?: SessionMeta
+	meta?: SessionMeta,
+	parsed?: ParsedJsonlInfo
 ): SessionListItem {
 	return {
 		sessionId,
@@ -206,11 +264,11 @@ function mergeSessionData(
 		modified: base.modified,
 		gitBranch: base.gitBranch || '',
 		model: undefined,
-		durationMinutes: meta?.duration_minutes,
+		durationMinutes: parsed?.durationMinutes ?? meta?.duration_minutes,
 		toolCounts: meta?.tool_counts,
 		languages: meta?.languages,
-		inputTokens: meta?.input_tokens,
-		outputTokens: meta?.output_tokens,
+		inputTokens: meta?.input_tokens ?? parsed?.inputTokens,
+		outputTokens: meta?.output_tokens ?? parsed?.outputTokens,
 		linesAdded: meta?.lines_added,
 		linesRemoved: meta?.lines_removed
 	};

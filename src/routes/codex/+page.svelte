@@ -9,7 +9,6 @@
 	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
 	import ProjectActivityChart from '$components/analytics/ProjectActivityChart.svelte';
 	import ProjectTokenChart from '$components/analytics/ProjectTokenChart.svelte';
-	import TerminalSelect from '$components/shared/TerminalSelect.svelte';
 	import { formatNumber, formatTokens } from '$utils/format.js';
 	import { type TimePeriod, periodOptions } from '$utils/time-period.js';
 
@@ -59,10 +58,23 @@
 		/>
 	</div>
 
-	<!-- Period Toggle -->
-	<div class="flex items-center gap-3">
-		<span class="text-xs text-text-muted uppercase tracking-wider">Period</span>
-		<TerminalSelect bind:value={period} options={periodOptions} />
+	<!-- Period Toggle + Charts -->
+	<div class="flex items-center justify-between">
+		<h2 class="text-sm font-semibold text-text-secondary">Activity Over Time</h2>
+		<div class="inline-flex bg-surface border border-border-subtle rounded-lg p-1 gap-0.5">
+			{#each periodOptions as opt}
+				<button
+					class="px-4 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer
+						{period === opt.value
+							? 'bg-accent text-white shadow-sm'
+							: 'text-text-muted hover:text-text hover:bg-surface-hover'}"
+					onclick={() => (period = opt.value as TimePeriod)}
+					type="button"
+				>
+					{opt.label}
+				</button>
+			{/each}
+		</div>
 	</div>
 
 	<!-- Charts Row 1 -->

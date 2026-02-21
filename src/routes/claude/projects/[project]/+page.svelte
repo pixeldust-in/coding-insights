@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
+	import SummaryCard from '$components/analytics/SummaryCard.svelte';
 	import Badge from '$components/shared/Badge.svelte';
 	import TerminalSearch from '$components/shared/TerminalSearch.svelte';
 	import TerminalSelect from '$components/shared/TerminalSelect.svelte';
-	import { relativeTime, formatDuration } from '$utils/format.js';
+	import { relativeTime, formatDuration, formatNumber, formatTokens } from '$utils/format.js';
 
 	let { data } = $props();
 
@@ -14,6 +15,18 @@
 		{ value: 'date', label: 'Sort by Date' },
 		{ value: 'messages', label: 'Sort by Messages' }
 	];
+
+	let metrics = $derived(() => {
+		const sessions = data.sessions;
+		let messages = 0, tokens = 0, duration = 0, lines = 0;
+		for (const s of sessions) {
+			messages += s.messageCount;
+			tokens += (s.inputTokens ?? 0) + (s.outputTokens ?? 0);
+			duration += s.durationMinutes ?? 0;
+			lines += (s.linesAdded ?? 0) + (s.linesRemoved ?? 0);
+		}
+		return { messages, tokens, duration, lines, avgDuration: sessions.length ? duration / sessions.length : 0 };
+	});
 
 	let filtered = $derived(() => {
 		let list = data.sessions;
@@ -41,6 +54,16 @@
 />
 
 <div class="p-6 space-y-4">
+	<!-- Project Metrics -->
+	<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+		<SummaryCard icon="◈" label="Sessions" value={formatNumber(data.sessions.length)} />
+		<SummaryCard icon="✉" label="Messages" value={formatNumber(metrics().messages)} />
+		<SummaryCard icon="◎" label="Total Tokens" value={formatTokens(metrics().tokens)} />
+		<SummaryCard icon="◷" label="Time Spent" value={formatDuration(metrics().duration)} />
+		<SummaryCard icon="±" label="Lines Changed" value={formatNumber(metrics().lines)} />
+		<SummaryCard icon="⌀" label="Avg Session" value={formatDuration(metrics().avgDuration)} />
+	</div>
+
 	<!-- Filters -->
 	<div class="flex items-center gap-3">
 		<TerminalSearch bind:value={search} placeholder="Search sessions..." class="w-72" />

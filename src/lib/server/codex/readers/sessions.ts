@@ -9,7 +9,7 @@ let cachedSessions: CodexSessionListItem[] | null = null;
 let cacheTime = 0;
 const CACHE_TTL = 30_000; // 30 seconds
 
-function findAllSessionFiles(): string[] {
+export function findAllSessionFiles(): string[] {
 	const files: string[] = [];
 
 	if (!existsSync(CODEX_SESSIONS_DIR)) return files;

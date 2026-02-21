@@ -15,6 +15,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		totalCount: session.totalCount,
 		meta: session.meta ?? null,
 		facets: session.facets ?? null,
-		firstPrompt: session.firstPrompt
+		firstPrompt: session.firstPrompt,
+		activeDurationMinutes: session.activeDurationMinutes
 	};
 };

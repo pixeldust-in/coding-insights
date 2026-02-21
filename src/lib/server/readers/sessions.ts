@@ -3,6 +3,7 @@ import { PROJECTS_DIR } from '../config.js';
 import { streamSessionMessages } from '../parsers/jsonl.js';
 import { getSessionMeta } from './session-meta.js';
 import { getSessionFacets } from './session-facets.js';
+import { getActiveDurationFromJsonl } from './projects.js';
 import { renderMarkdown } from '../markdown.js';
 import type { ConversationMessage, SessionMeta, SessionFacets, TextBlock } from '../types.js';
 
@@ -14,6 +15,7 @@ export interface SessionDetail {
 	meta: SessionMeta | undefined;
 	facets: SessionFacets | undefined;
 	firstPrompt: string;
+	activeDurationMinutes: number;
 }
 
 export async function loadSession(
@@ -26,6 +28,7 @@ export async function loadSession(
 	const { messages, totalCount } = await streamSessionMessages(filePath, { offset, limit });
 	const meta = getSessionMeta(sessionId);
 	const facets = getSessionFacets(sessionId);
+	const activeDurationMinutes = getActiveDurationFromJsonl(filePath);
 
 	// Extract first prompt from messages when meta is unavailable
 	let firstPrompt = meta?.first_prompt || '';
@@ -47,7 +50,7 @@ export async function loadSession(
 
 	await renderMessagesMarkdown(messages);
 
-	return { sessionId, projectDir, messages, totalCount, meta, facets, firstPrompt };
+	return { sessionId, projectDir, messages, totalCount, meta, facets, firstPrompt, activeDurationMinutes };
 }
 
 export async function loadSessionMessages(

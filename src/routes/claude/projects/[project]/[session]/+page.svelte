@@ -54,8 +54,8 @@
 				<span class="text-xs text-text-muted">
 					{data.meta.user_message_count + data.meta.assistant_message_count} messages
 				</span>
-				{#if data.meta.duration_minutes}
-					<span class="text-xs text-text-muted">{formatDuration(data.meta.duration_minutes)}</span>
+				{#if data.activeDurationMinutes || data.meta.duration_minutes}
+					<span class="text-xs text-text-muted">{formatDuration(data.activeDurationMinutes || data.meta.duration_minutes)}</span>
 				{/if}
 				{#if data.meta.input_tokens || data.meta.output_tokens}
 					<span class="text-xs text-text-muted">
