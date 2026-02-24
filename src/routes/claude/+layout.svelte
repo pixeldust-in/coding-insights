@@ -10,7 +10,8 @@
 		{ label: 'Projects', href: '/claude/projects', icon: '◫' },
 		{ label: 'Commands', href: '/claude/commands', icon: '⌘' },
 		{ label: 'Skills', href: '/claude/skills', icon: '✦' },
-		{ label: 'Settings', href: '/claude/settings', icon: '⚙' }
+		{ label: 'Settings', href: '/claude/settings', icon: '⚙' },
+		{ label: 'Help', href: '/claude/help', icon: '?' }
 	];
 </script>
 

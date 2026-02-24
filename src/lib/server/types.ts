@@ -275,6 +275,35 @@ export interface Plugin {
 	lastUpdated: string;
 }
 
+// CLI Help
+export interface CliFlag {
+	short?: string;
+	long: string;
+	argument?: string;
+	description: string;
+}
+
+export interface CliSubcommand {
+	name: string;
+	summary: string;
+}
+
+export interface CliSlashCommand {
+	name: string;
+	description: string;
+	argument?: string;
+}
+
+export interface CliHelpData {
+	tool: 'claude' | 'codex';
+	usage: string;
+	description: string;
+	options: CliFlag[];
+	subcommands: CliSubcommand[];
+	slashCommands: CliSlashCommand[];
+	error?: string;
+}
+
 // History
 export interface HistoryEntry {
 	display: string;

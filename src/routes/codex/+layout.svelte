@@ -9,7 +9,8 @@
 		{ label: 'History', href: '/codex/history', icon: '↻' },
 		{ label: 'Projects', href: '/codex/projects', icon: '▣' },
 		{ label: 'Skills', href: '/codex/skills', icon: '✦' },
-		{ label: 'Settings', href: '/codex/settings', icon: '⚙' }
+		{ label: 'Settings', href: '/codex/settings', icon: '⚙' },
+		{ label: 'Help', href: '/codex/help', icon: '?' }
 	];
 </script>
 
