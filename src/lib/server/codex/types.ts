@@ -40,6 +40,16 @@ export interface CodexConfig {
 	notice?: Record<string, unknown>;
 }
 
+export interface CodexPlan {
+	id: string;
+	title: string;
+	content: string;
+	preview: string;
+	sessionId: string;
+	timestamp: string;
+	projectName: string;
+}
+
 export interface CodexDashboardStats {
 	totalSessions: number;
 	totalMessages: number;
