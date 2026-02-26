@@ -99,37 +99,45 @@
 				<Badge variant="success">saved</Badge>
 			{/if}
 		</div>
-		<div class="flex items-center gap-2 flex-shrink-0">
+		<div class="flex items-center gap-1 flex-shrink-0">
 			<button
 				onclick={copyToClipboard}
-				class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer
+				class="p-1.5 rounded-lg transition-colors cursor-pointer
 					{copied
-					? 'bg-success/15 text-success'
-					: 'bg-surface-hover text-text-secondary hover:text-text'}"
+					? 'text-success'
+					: 'text-text-muted hover:text-text hover:bg-surface-hover'}"
 				disabled={!exists && savedContent === null && !editing}
+				title={copied ? 'Copied!' : 'Copy to clipboard'}
 			>
-				{copied ? 'Copied!' : 'Copy'}
+				{#if copied}
+					<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+				{:else}
+					<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+				{/if}
 			</button>
 			{#if editing}
 				<button
 					onclick={cancelEditing}
-					class="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-hover text-text-secondary hover:text-text transition-colors cursor-pointer"
+					class="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
+					title="Cancel editing"
 				>
-					Cancel
+					<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 				</button>
 				<button
 					onclick={save}
 					disabled={saving}
-					class="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent/15 text-accent hover:bg-accent/25 transition-colors cursor-pointer disabled:opacity-50"
+					class="p-1.5 rounded-lg text-accent hover:bg-accent/15 transition-colors cursor-pointer disabled:opacity-50"
+					title={saving ? 'Saving...' : 'Save changes'}
 				>
-					{saving ? 'Saving...' : 'Save'}
+					<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
 				</button>
 			{:else}
 				<button
 					onclick={startEditing}
-					class="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-hover text-text-secondary hover:text-text transition-colors cursor-pointer"
+					class="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors cursor-pointer"
+					title="Edit file"
 				>
-					Edit
+					<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
 				</button>
 			{/if}
 		</div>
