@@ -5,13 +5,13 @@
 
 	const navItems = [
 		{ label: 'Dashboard', href: '/codex', icon: '◆' },
+		{ label: 'Projects', href: '/codex/projects', icon: '▣' },
 		{ label: 'Sessions', href: '/codex/sessions', icon: '◈' },
 		{ label: 'History', href: '/codex/history', icon: '↻' },
-		{ label: 'Projects', href: '/codex/projects', icon: '▣' },
-		{ label: 'Skills', href: '/codex/skills', icon: '✦' },
 		{ label: 'Plans', href: '/codex/plans', icon: '▤' },
-		{ label: 'Settings', href: '/codex/settings', icon: '⚙' },
-		{ label: 'Help', href: '/codex/help', icon: '?' }
+		{ label: 'Skills', href: '/codex/skills', icon: '✦' },
+		{ label: 'Help', href: '/codex/help', icon: '?' },
+		{ label: 'Settings', href: '/codex/settings', icon: '⚙' }
 	];
 </script>
 

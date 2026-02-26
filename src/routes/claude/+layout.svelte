@@ -5,14 +5,14 @@
 
 	const navItems = [
 		{ label: 'Dashboard', href: '/claude', icon: '◈' },
+		{ label: 'Projects', href: '/claude/projects', icon: '◫' },
 		{ label: 'Sessions', href: '/claude/sessions', icon: '◇' },
 		{ label: 'History', href: '/claude/history', icon: '↻' },
-		{ label: 'Projects', href: '/claude/projects', icon: '◫' },
-		{ label: 'Commands', href: '/claude/commands', icon: '⌘' },
-		{ label: 'Skills', href: '/claude/skills', icon: '✦' },
 		{ label: 'Plans', href: '/claude/plans', icon: '▤' },
-		{ label: 'Settings', href: '/claude/settings', icon: '⚙' },
-		{ label: 'Help', href: '/claude/help', icon: '?' }
+		{ label: 'Skills', href: '/claude/skills', icon: '✦' },
+		{ label: 'Commands', href: '/claude/commands', icon: '⌘' },
+		{ label: 'Help', href: '/claude/help', icon: '?' },
+		{ label: 'Settings', href: '/claude/settings', icon: '⚙' }
 	];
 </script>
 
