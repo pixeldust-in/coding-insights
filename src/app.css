@@ -155,6 +155,65 @@ html.light [data-tool="codex"] {
 	}
 }
 
+/* ─── Diff View ─── */
+.diff-line-added {
+	background-color: rgba(46, 160, 67, 0.15);
+}
+
+.diff-line-removed {
+	background-color: rgba(248, 81, 73, 0.15);
+}
+
+html.light .diff-line-added {
+	background-color: rgba(46, 160, 67, 0.12);
+}
+
+html.light .diff-line-removed {
+	background-color: rgba(248, 81, 73, 0.10);
+}
+
+.diff-gutter {
+	color: var(--color-text-muted);
+	border-right: 1px solid var(--color-border-subtle);
+	user-select: none;
+}
+
+.diff-marker-add {
+	color: #3fb950;
+}
+
+.diff-marker-remove {
+	color: #f85149;
+}
+
+html.light .diff-marker-add {
+	color: #1a7f37;
+}
+
+html.light .diff-marker-remove {
+	color: #cf222e;
+}
+
+.diff-line:hover {
+	background-color: var(--color-surface-hover);
+}
+
+.diff-line-added:hover {
+	background-color: rgba(46, 160, 67, 0.25);
+}
+
+.diff-line-removed:hover {
+	background-color: rgba(248, 81, 73, 0.25);
+}
+
+html.light .diff-line-added:hover {
+	background-color: rgba(46, 160, 67, 0.20);
+}
+
+html.light .diff-line-removed:hover {
+	background-color: rgba(248, 81, 73, 0.18);
+}
+
 /* ─── Light Mode: soft shadows for cards ─── */
 html.light .card-elevated {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);

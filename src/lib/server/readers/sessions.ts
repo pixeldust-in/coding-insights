@@ -65,7 +65,7 @@ export async function loadSessionMessages(
 	return result;
 }
 
-async function renderMessagesMarkdown(messages: ConversationMessage[]): Promise<void> {
+export async function renderMessagesMarkdown(messages: ConversationMessage[]): Promise<void> {
 	for (const msg of messages) {
 		if (typeof msg.content === 'string') {
 			if (msg.content.trim()) {

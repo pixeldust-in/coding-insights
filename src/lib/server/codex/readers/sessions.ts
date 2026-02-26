@@ -4,6 +4,7 @@ import { CODEX_SESSIONS_DIR } from '../config.js';
 import { streamCodexSessionMessages, scanCodexSessionMeta } from '../parsers/codex-jsonl.js';
 import type { CodexSessionListItem } from '../types.js';
 import type { ConversationMessage } from '../../types.js';
+import { renderMessagesMarkdown } from '../../readers/sessions.js';
 
 let cachedSessions: CodexSessionListItem[] | null = null;
 let cacheTime = 0;
@@ -77,7 +78,9 @@ export async function loadCodexSession(
 ): Promise<{ messages: ConversationMessage[]; totalCount: number } | null> {
 	const filePath = findSessionFile(sessionId);
 	if (!filePath) return null;
-	return streamCodexSessionMessages(filePath, { offset, limit });
+	const result = await streamCodexSessionMessages(filePath, { offset, limit });
+	await renderMessagesMarkdown(result.messages);
+	return result;
 }
 
 export async function loadCodexSessionMessages(
@@ -87,5 +90,7 @@ export async function loadCodexSessionMessages(
 ): Promise<{ messages: ConversationMessage[]; totalCount: number }> {
 	const filePath = findSessionFile(sessionId);
 	if (!filePath) return { messages: [], totalCount: 0 };
-	return streamCodexSessionMessages(filePath, { offset, limit });
+	const result = await streamCodexSessionMessages(filePath, { offset, limit });
+	await renderMessagesMarkdown(result.messages);
+	return result;
 }

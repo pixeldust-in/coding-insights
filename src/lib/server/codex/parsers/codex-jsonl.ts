@@ -2,6 +2,7 @@ import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
 import type { ConversationMessage, ContentBlock, TextBlock, ThinkingBlock, ToolUseBlock, ToolResultBlock } from '../../types.js';
 import type { CodexSessionListItem, CodexSessionMeta } from '../types.js';
+import { extToLanguage } from '$utils/languages.js';
 
 interface CodexLine {
 	timestamp: string;
@@ -139,6 +140,11 @@ export async function streamCodexSessionMessages(
 				if (args) input = JSON.parse(args);
 			} catch {
 				input = { raw: payload.arguments };
+			}
+
+			// apply_patch stores patch content in payload.input, not arguments
+			if (name === 'apply_patch' && typeof payload.input === 'string') {
+				input = { patch: payload.input };
 			}
 
 			if (!currentAssistant) {
@@ -305,18 +311,6 @@ export async function scanCodexSessionMeta(filePath: string): Promise<CodexSessi
 		messageCount
 	};
 }
-
-const extToLanguage: Record<string, string> = {
-	'.ts': 'TypeScript', '.tsx': 'TypeScript', '.js': 'JavaScript', '.jsx': 'JavaScript',
-	'.py': 'Python', '.rs': 'Rust', '.go': 'Go', '.java': 'Java', '.kt': 'Kotlin',
-	'.rb': 'Ruby', '.php': 'PHP', '.cs': 'C#', '.cpp': 'C++', '.cc': 'C++', '.c': 'C',
-	'.h': 'C', '.hpp': 'C++', '.swift': 'Swift', '.dart': 'Dart', '.scala': 'Scala',
-	'.svelte': 'Svelte', '.vue': 'Vue', '.html': 'HTML', '.css': 'CSS', '.scss': 'SCSS',
-	'.json': 'JSON', '.yaml': 'YAML', '.yml': 'YAML', '.toml': 'TOML',
-	'.md': 'Markdown', '.sql': 'SQL', '.sh': 'Shell', '.bash': 'Shell', '.zsh': 'Shell',
-	'.lua': 'Lua', '.r': 'R', '.ex': 'Elixir', '.exs': 'Elixir', '.zig': 'Zig',
-	'.graphql': 'GraphQL', '.proto': 'Protobuf', '.tf': 'Terraform',
-};
 
 function extractLanguagesFromPatch(input: string): string[] {
 	const langs: string[] = [];
