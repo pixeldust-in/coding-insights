@@ -45,6 +45,7 @@
 						grid: { display: false }
 					},
 					y: {
+						title: { display: true, text: 'Sessions', color: theme.textMuted, font: { size: 10 } },
 						ticks: { color: theme.textMuted, font: { size: 10 } },
 						grid: { color: theme.gridColor }
 					}
