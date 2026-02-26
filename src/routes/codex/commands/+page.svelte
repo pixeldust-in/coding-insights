@@ -6,7 +6,7 @@
 	let expanded = $state<string | null>(null);
 </script>
 
-<Header breadcrumbs={[{ label: 'Commands' }]} />
+<Header breadcrumbs={[{ label: 'Custom Prompts' }]} />
 
 <div class="p-6">
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -33,9 +33,7 @@
 					</div>
 					{#if cmd.allowedTools}
 						<div class="flex flex-wrap gap-1.5 mt-3">
-							{#each cmd.allowedTools.split('),').map((t) => t.trim().replace(/\)$/, '') + ')') as tool}
-								<Badge>{tool}</Badge>
-							{/each}
+							<Badge>{cmd.allowedTools}</Badge>
 						</div>
 					{/if}
 				</button>
