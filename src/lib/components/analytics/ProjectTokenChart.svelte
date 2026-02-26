@@ -63,6 +63,7 @@
 				plugins: {
 					legend: { labels: { color: theme.textSecondary, font: { size: 11 } } },
 					tooltip: {
+						itemSort: (a, b) => (b.raw as number) - (a.raw as number),
 						callbacks: {
 							label: (ctx) => `${ctx.dataset.label}: ${formatTokenValue(ctx.raw as number)}`,
 							footer: (items) => {

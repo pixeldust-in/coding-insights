@@ -53,7 +53,10 @@
 				maintainAspectRatio: false,
 				interaction: { mode: 'index', intersect: false },
 				plugins: {
-					legend: { labels: { color: theme.textSecondary, font: { size: 11 } } }
+					legend: { labels: { color: theme.textSecondary, font: { size: 11 } } },
+					tooltip: {
+						itemSort: (a, b) => (b.raw as number) - (a.raw as number)
+					}
 				},
 				scales: {
 					x: {

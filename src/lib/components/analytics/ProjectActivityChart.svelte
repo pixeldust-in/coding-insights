@@ -55,6 +55,7 @@
 				plugins: {
 					legend: { labels: { color: theme.textSecondary, font: { size: 11 } } },
 					tooltip: {
+						itemSort: (a, b) => (b.raw as number) - (a.raw as number),
 						callbacks: {
 							footer: (items) => {
 								const total = items.reduce((sum, item) => sum + (item.raw as number), 0);
