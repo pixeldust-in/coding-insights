@@ -60,7 +60,7 @@
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated flex flex-col">
 	<h3 class="text-sm font-semibold text-text-secondary mb-2">Activity by Hour</h3>
-	<div class="flex-1 min-h-0">
+	<div class="flex-1 min-h-0 max-h-70">
 		<canvas bind:this={canvas}></canvas>
 	</div>
 </div>
