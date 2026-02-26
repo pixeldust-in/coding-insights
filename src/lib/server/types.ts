@@ -275,6 +275,15 @@ export interface Plugin {
 	lastUpdated: string;
 }
 
+// Config Files
+export interface ConfigFile {
+	filePath: string;
+	displayName: string;
+	description: string;
+	content: string;
+	exists: boolean;
+}
+
 // CLI Help
 export interface CliFlag {
 	short?: string;

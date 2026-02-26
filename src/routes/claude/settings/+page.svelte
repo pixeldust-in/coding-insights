@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
 	import Badge from '$components/shared/Badge.svelte';
+	import FileEditor from '$components/shared/FileEditor.svelte';
 	import { formatDate } from '$utils/format.js';
 
 	let { data } = $props();
-	let activeTab = $state<'general' | 'permissions' | 'plugins'>('general');
+	let activeTab = $state<'general' | 'permissions' | 'plugins' | 'files'>('general');
 </script>
 
 <Header breadcrumbs={[{ label: 'Settings' }]} />
@@ -15,7 +16,8 @@
 		{#each [
 			{ key: 'general', label: 'General' },
 			{ key: 'permissions', label: 'Permissions' },
-			{ key: 'plugins', label: 'Plugins' }
+			{ key: 'plugins', label: 'Plugins' },
+			{ key: 'files', label: 'Files' }
 		] as tab}
 			<button
 				onclick={() => (activeTab = tab.key as typeof activeTab)}
@@ -115,6 +117,25 @@
 			{#if data.plugins.length === 0}
 				<div class="text-center py-8 text-text-muted text-sm">No plugins installed</div>
 			{/if}
+		</div>
+	{/if}
+
+	<!-- Files Tab -->
+	{#if activeTab === 'files'}
+		<div class="space-y-4">
+			<p class="text-xs text-text-muted">
+				View and edit your global Claude Code configuration files. Changes are written directly to disk.
+			</p>
+			{#each data.configFiles as file}
+				<FileEditor
+					filePath={file.filePath}
+					displayName={file.displayName}
+					description={file.description}
+					content={file.content}
+					exists={file.exists}
+					apiEndpoint="/api/claude/files"
+				/>
+			{/each}
 		</div>
 	{/if}
 </div>

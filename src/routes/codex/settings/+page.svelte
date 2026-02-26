@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
 	import Badge from '$components/shared/Badge.svelte';
+	import FileEditor from '$components/shared/FileEditor.svelte';
 
 	let { data } = $props();
-	let activeTab = $state<'general' | 'projects' | 'mcp'>('general');
+	let activeTab = $state<'general' | 'projects' | 'mcp' | 'files'>('general');
 
 	let projects = $derived(
 		data.config.projects
@@ -32,7 +33,8 @@
 		{#each [
 			{ key: 'general', label: 'General' },
 			{ key: 'projects', label: 'Project Trust' },
-			{ key: 'mcp', label: 'MCP Servers' }
+			{ key: 'mcp', label: 'MCP Servers' },
+			{ key: 'files', label: 'Files' }
 		] as tab}
 			<button
 				onclick={() => (activeTab = tab.key as typeof activeTab)}
@@ -112,6 +114,25 @@
 			{#if mcpServers.length === 0}
 				<div class="text-center py-8 text-text-muted text-sm">No MCP servers configured</div>
 			{/if}
+		</div>
+	{/if}
+
+	<!-- Files Tab -->
+	{#if activeTab === 'files'}
+		<div class="space-y-4">
+			<p class="text-xs text-text-muted">
+				View and edit your Codex CLI configuration files. Changes are written directly to disk.
+			</p>
+			{#each data.configFiles as file}
+				<FileEditor
+					filePath={file.filePath}
+					displayName={file.displayName}
+					description={file.description}
+					content={file.content}
+					exists={file.exists}
+					apiEndpoint="/api/codex/files"
+				/>
+			{/each}
 		</div>
 	{/if}
 </div>

@@ -13,3 +13,5 @@ export const HISTORY_PATH = join(CLAUDE_DIR, 'history.jsonl');
 export const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
 export const SETTINGS_LOCAL_PATH = join(CLAUDE_DIR, 'settings.local.json');
 export const PLUGINS_PATH = join(CLAUDE_DIR, 'plugins', 'installed_plugins.json');
+export const CLAUDE_MD_PATH = join(CLAUDE_DIR, 'CLAUDE.md');
+export const AGENTS_DIR = join(CLAUDE_DIR, 'agents');
