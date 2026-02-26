@@ -32,25 +32,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		totalTokens += scan.totalInputTokens + scan.totalOutputTokens;
 		const toolCalls = Object.values(scan.functionCallCounts).reduce((a, b) => a + b, 0);
 		totalToolCalls += toolCalls;
-	}
-
-	// Estimate duration from first→last session timestamp span
-	if (sessions.length > 0) {
-		const sorted = [...sessions].sort(
-			(a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-		);
-		for (const s of sorted) {
-			// Each session's duration: approximate from timestamp differences
-			// Use a minimum of 5 min per session as a rough estimate
-			totalDurationMinutes += 5;
-		}
-		// Better: use first-to-last timestamp span if multiple sessions
-		const first = new Date(sorted[0].timestamp).getTime();
-		const last = new Date(sorted[sorted.length - 1].timestamp).getTime();
-		const spanMinutes = (last - first) / 60_000;
-		if (spanMinutes > totalDurationMinutes) {
-			totalDurationMinutes = Math.round(spanMinutes);
-		}
+		totalDurationMinutes += scan.durationMinutes;
 	}
 
 	return {

@@ -336,6 +336,7 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 	functionCallCounts: Record<string, number>;
 	languages: Record<string, number>;
 	hourOfDay: number | null;
+	durationMinutes: number;
 }> {
 	const rl = createInterface({
 		input: createReadStream(filePath, { encoding: 'utf-8' }),
@@ -349,6 +350,8 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 	const functionCallCounts: Record<string, number> = {};
 	const languages: Record<string, number> = {};
 	let hourOfDay: number | null = null;
+	let firstTimestamp: number | null = null;
+	let lastTimestamp: number | null = null;
 
 	for await (const line of rl) {
 		if (!line.trim()) continue;
@@ -360,10 +363,15 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 			continue;
 		}
 
-		// Get hour from first timestamp
-		if (hourOfDay === null && parsed.timestamp) {
+		// Track first/last timestamps for duration calculation
+		if (parsed.timestamp) {
 			try {
-				hourOfDay = new Date(parsed.timestamp).getHours();
+				const ts = new Date(parsed.timestamp).getTime();
+				if (!isNaN(ts)) {
+					if (firstTimestamp === null) firstTimestamp = ts;
+					lastTimestamp = ts;
+					if (hourOfDay === null) hourOfDay = new Date(ts).getHours();
+				}
 			} catch { /* ignore */ }
 		}
 
@@ -411,5 +419,9 @@ export async function fullScanCodexSession(filePath: string): Promise<{
 		}
 	}
 
-	return { messageCount, totalInputTokens, totalOutputTokens, totalReasoningTokens, functionCallCounts, languages, hourOfDay };
+	const durationMinutes = (firstTimestamp !== null && lastTimestamp !== null)
+		? (lastTimestamp - firstTimestamp) / 60_000
+		: 0;
+
+	return { messageCount, totalInputTokens, totalOutputTokens, totalReasoningTokens, functionCallCounts, languages, hourOfDay, durationMinutes };
 }
