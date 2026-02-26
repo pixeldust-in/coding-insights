@@ -58,7 +58,7 @@
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
 	<h3 class="text-sm font-semibold text-text-secondary mb-4">Activity by Hour</h3>
-	<div class="h-48">
+	<div class="h-64">
 		<canvas bind:this={canvas}></canvas>
 	</div>
 </div>

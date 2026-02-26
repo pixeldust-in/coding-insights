@@ -103,11 +103,13 @@ export const load: PageServerLoad = async () => {
 		}))
 		.sort((a, b) => b.totalTokens - a.totalTokens);
 
-	// Compute total tokens
+	// Compute total tokens and total cost
 	let totalTokens = 0;
+	let totalCost = 0;
 	for (const usage of Object.values(stats.modelUsage)) {
 		totalTokens += usage.inputTokens + usage.outputTokens
 			+ usage.cacheReadInputTokens + usage.cacheCreationInputTokens;
+		totalCost += usage.costUSD || 0;
 	}
 
 	// Count active days
@@ -118,6 +120,7 @@ export const load: PageServerLoad = async () => {
 		toolCounts,
 		languages,
 		totalTokens,
+		totalCost,
 		activeDays,
 		dailyProjectActivity,
 		dailyProjectTokens,

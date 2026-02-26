@@ -14,15 +14,40 @@
 
 	let { data } = $props();
 	let period = $state<TimePeriod>('week');
+
+	const costLabel = $derived(
+		data.totalCost > 0
+			? `$${data.totalCost.toFixed(2)}`
+			: formatNumber(Math.round(data.stats.totalMessages / (data.activeDays || 1)))
+	);
+	const costCardLabel = $derived(data.totalCost > 0 ? 'Est. Cost' : 'Avg Msgs/Day');
+	const costCardIcon = $derived(data.totalCost > 0 ? '◇' : '⌀');
+	const costCardSubtitle = $derived(
+		data.totalCost > 0 ? 'Across all models' : `Over ${data.activeDays} active days`
+	);
+
+	// Model usage table totals
+	const modelTotals = $derived.by(() => {
+		let inputTokens = 0;
+		let outputTokens = 0;
+		let cacheRead = 0;
+		let cacheWrite = 0;
+		let cost = 0;
+		for (const usage of Object.values(data.stats.modelUsage)) {
+			inputTokens += usage.inputTokens;
+			outputTokens += usage.outputTokens;
+			cacheRead += usage.cacheReadInputTokens;
+			cacheWrite += usage.cacheCreationInputTokens;
+			cost += usage.costUSD || 0;
+		}
+		return { inputTokens, outputTokens, cacheRead, cacheWrite, cost };
+	});
 </script>
 
 <Header title="Dashboard" />
 
 <div class="p-6 space-y-6">
-	<!-- Live Usage -->
-	<UsagePanel />
-
-	<!-- Summary Cards -->
+	<!-- Summary Cards (server-rendered, instant) -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 		<SummaryCard
 			icon="◈"
@@ -42,53 +67,63 @@
 			subtitle="Across all models"
 		/>
 		<SummaryCard
-			icon="◆"
-			label="Active Days"
-			value={data.activeDays}
+			icon={costCardIcon}
+			label={costCardLabel}
+			value={costLabel}
+			subtitle={costCardSubtitle}
 		/>
 	</div>
 
-	<!-- Period Toggle + Charts -->
-	<div class="flex items-center justify-between">
-		<h2 class="text-sm font-semibold text-text-secondary">Activity Over Time</h2>
-		<div class="inline-flex bg-surface border border-border-subtle rounded-lg p-1 gap-0.5">
-			{#each periodOptions as opt}
-				<button
-					class="px-4 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer
-						{period === opt.value
-							? 'bg-accent text-white shadow-sm'
-							: 'text-text-muted hover:text-text hover:bg-surface-hover'}"
-					onclick={() => (period = opt.value as TimePeriod)}
-					type="button"
-				>
-					{opt.label}
-				</button>
-			{/each}
+	<!-- Live Usage (async, loads below KPIs) -->
+	<UsagePanel />
+
+	<!-- Activity Over Time -->
+	<div class="space-y-4">
+		<div class="flex items-center justify-between">
+			<h2 class="text-sm font-semibold text-text-secondary">Activity Over Time</h2>
+			<div class="inline-flex bg-surface border border-border-subtle rounded-lg p-1 gap-0.5">
+				{#each periodOptions as opt}
+					<button
+						class="px-4 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer
+							{period === opt.value
+								? 'bg-accent text-white shadow-sm'
+								: 'text-text-muted hover:text-text hover:bg-surface-hover'}"
+						onclick={() => (period = opt.value as TimePeriod)}
+						type="button"
+					>
+						{opt.label}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<!-- Overall -->
+		<h3 class="text-xs font-medium text-text-muted uppercase tracking-wider">Overall</h3>
+		<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+			{#key period}
+				<ActivityChart data={data.stats.dailyActivity} {period} />
+				<TokenChart data={data.stats.dailyModelTokens} {period} />
+			{/key}
+		</div>
+
+		<!-- By Project -->
+		<h3 class="text-xs font-medium text-text-muted uppercase tracking-wider">By Project</h3>
+		<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+			{#key period}
+				<ProjectActivityChart data={data.dailyProjectActivity} {period} />
+				<ProjectTokenChart data={data.dailyProjectTokens} {period} />
+			{/key}
 		</div>
 	</div>
 
-	<!-- Charts Row 1 -->
+	<!-- Distribution Charts -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		{#key period}
-			<ActivityChart data={data.stats.dailyActivity} {period} />
-			<TokenChart data={data.stats.dailyModelTokens} {period} />
-		{/key}
-	</div>
-
-	<!-- Project Charts -->
-	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-		{#key period}
-			<ProjectActivityChart data={data.dailyProjectActivity} {period} />
-			<ProjectTokenChart data={data.dailyProjectTokens} {period} />
-		{/key}
-	</div>
-
-	<!-- Charts Row 2 -->
-	<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
 		<ToolUsageChart data={data.toolCounts} />
 		<LanguageChart data={data.languages} />
-		<HourHeatmap data={data.stats.hourCounts} />
 	</div>
+
+	<!-- Hour Heatmap (full width) -->
+	<HourHeatmap data={data.stats.hourCounts} />
 
 	<!-- Model Usage Table -->
 	<div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
@@ -98,6 +133,7 @@
 				<thead>
 					<tr class="text-left text-text-muted border-b border-border-subtle">
 						<th class="pb-2 font-medium">Model</th>
+						<th class="pb-2 font-medium text-right">Cost</th>
 						<th class="pb-2 font-medium text-right">Input Tokens</th>
 						<th class="pb-2 font-medium text-right">Output Tokens</th>
 						<th class="pb-2 font-medium text-right">Cache Read</th>
@@ -108,6 +144,7 @@
 					{#each Object.entries(data.stats.modelUsage) as [model, usage]}
 						<tr class="border-b border-border-subtle/50">
 							<td class="py-2 font-mono text-xs text-accent">{model}</td>
+							<td class="py-2 text-right tabular-nums">{usage.costUSD > 0 ? `$${usage.costUSD.toFixed(2)}` : '—'}</td>
 							<td class="py-2 text-right tabular-nums">{formatTokens(usage.inputTokens)}</td>
 							<td class="py-2 text-right tabular-nums">{formatTokens(usage.outputTokens)}</td>
 							<td class="py-2 text-right tabular-nums">{formatTokens(usage.cacheReadInputTokens)}</td>
@@ -115,6 +152,16 @@
 						</tr>
 					{/each}
 				</tbody>
+				<tfoot>
+					<tr class="border-t border-border-subtle font-medium">
+						<td class="pt-2 text-text-secondary text-xs">Total</td>
+						<td class="pt-2 text-right tabular-nums">{modelTotals.cost > 0 ? `$${modelTotals.cost.toFixed(2)}` : '—'}</td>
+						<td class="pt-2 text-right tabular-nums">{formatTokens(modelTotals.inputTokens)}</td>
+						<td class="pt-2 text-right tabular-nums">{formatTokens(modelTotals.outputTokens)}</td>
+						<td class="pt-2 text-right tabular-nums">{formatTokens(modelTotals.cacheRead)}</td>
+						<td class="pt-2 text-right tabular-nums">{formatTokens(modelTotals.cacheWrite)}</td>
+					</tr>
+				</tfoot>
 			</table>
 		</div>
 	</div>
