@@ -17,6 +17,7 @@
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
+	let legendItems = $state<{ label: string; color: string }[]>([]);
 
 	onMount(() => {
 		if (!aggregated.length) return;
@@ -35,6 +36,8 @@
 			return a.localeCompare(b);
 		});
 
+		legendItems = projects.map((p, i) => ({ label: p, color: palette[i % palette.length] }));
+
 		const labels = aggregated.map((d) => formatPeriodLabel(d.date, period));
 
 		const datasets = projects.map((project, i) => ({
@@ -51,9 +54,10 @@
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
+				layout: { padding: { top: 0 } },
 				interaction: { mode: 'index', intersect: false },
 				plugins: {
-					legend: { labels: { color: theme.textSecondary, font: { size: 11 } } },
+					legend: { display: false },
 					tooltip: {
 						itemSort: (a, b) => (b.raw as number) - (a.raw as number),
 						callbacks: {
@@ -84,7 +88,17 @@
 </script>
 
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-	<h3 class="text-sm font-semibold text-text-secondary mb-4">{periodLabel(period)} Activity by Project</h3>
+	<h3 class="text-sm font-semibold text-text-secondary mb-2">{periodLabel(period)} Activity by Project</h3>
+	{#if legendItems.length}
+		<div class="flex flex-wrap gap-x-3 gap-y-1 mb-2 max-h-10 overflow-hidden">
+			{#each legendItems as item}
+				<span class="flex items-center gap-1.5 text-[10px] text-text-secondary whitespace-nowrap">
+					<span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:{item.color}"></span>
+					{item.label}
+				</span>
+			{/each}
+		</div>
+	{/if}
 	{#if data.length}
 		<div class="h-64">
 			<canvas bind:this={canvas}></canvas>
