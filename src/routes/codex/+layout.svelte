@@ -10,6 +10,7 @@
 		{ label: 'History', href: '/codex/history', icon: '↻' },
 		{ label: 'Plans', href: '/codex/plans', icon: '▤' },
 		{ label: 'Skills', href: '/codex/skills', icon: '✦' },
+		{ label: 'Commands', href: '/codex/commands', icon: '⌘' },
 		{ label: 'Help', href: '/codex/help', icon: '?' },
 		{ label: 'Settings', href: '/codex/settings', icon: '⚙' }
 	];
