@@ -9,6 +9,12 @@
 <Header breadcrumbs={[{ label: 'Commands' }]} />
 
 <div class="p-6">
+	{#if data.commands.length === 0}
+		<div class="bg-surface border border-border-subtle rounded-xl p-10 card-elevated text-center">
+			<p class="text-text-muted text-sm">No custom commands found</p>
+			<p class="text-text-muted text-xs mt-2">Add <code class="text-accent">.md</code> files to <code class="text-accent">~/.claude/commands/</code> to create custom slash commands</p>
+		</div>
+	{/if}
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 		{#each data.commands as cmd}
 			<div class="bg-surface border border-border-subtle rounded-xl overflow-hidden card-elevated">
