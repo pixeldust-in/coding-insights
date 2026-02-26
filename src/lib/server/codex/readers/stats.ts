@@ -63,18 +63,20 @@ export async function computeCodexStats(): Promise<CodexDashboardStats> {
 		}
 
 		// Model tokens
-		const model = session.model || 'unknown';
-		if (!modelTokens[model]) {
-			modelTokens[model] = { input: 0, output: 0, reasoning: 0 };
-		}
-		modelTokens[model].input += scan.totalInputTokens;
-		modelTokens[model].output += scan.totalOutputTokens;
-		modelTokens[model].reasoning += scan.totalReasoningTokens;
+		const model = session.model;
+		if (model) {
+			if (!modelTokens[model]) {
+				modelTokens[model] = { input: 0, output: 0, reasoning: 0 };
+			}
+			modelTokens[model].input += scan.totalInputTokens;
+			modelTokens[model].output += scan.totalOutputTokens;
+			modelTokens[model].reasoning += scan.totalReasoningTokens;
 
-		// Daily model tokens
-		if (!dailyModelTokenMap.has(date)) dailyModelTokenMap.set(date, new Map());
-		const dayModelMap = dailyModelTokenMap.get(date)!;
-		dayModelMap.set(model, (dayModelMap.get(model) || 0) + scan.totalInputTokens + scan.totalOutputTokens);
+			// Daily model tokens
+			if (!dailyModelTokenMap.has(date)) dailyModelTokenMap.set(date, new Map());
+			const dayModelMap = dailyModelTokenMap.get(date)!;
+			dayModelMap.set(model, (dayModelMap.get(model) || 0) + scan.totalInputTokens + scan.totalOutputTokens);
+		}
 
 		// Per-project stats
 		const project = session.cwd ? shortName(session.cwd) : 'Unknown';
