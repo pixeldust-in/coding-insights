@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
+	import SummaryCard from '$components/analytics/SummaryCard.svelte';
 	import Badge from '$components/shared/Badge.svelte';
 	import TerminalSearch from '$components/shared/TerminalSearch.svelte';
 	import TerminalSelect from '$components/shared/TerminalSelect.svelte';
-	import { relativeTime } from '$utils/format.js';
+	import { relativeTime, formatNumber, formatTokens, formatDuration } from '$utils/format.js';
 
 	let { data } = $props();
 
@@ -40,6 +41,16 @@
 />
 
 <div class="p-6 space-y-4">
+	<!-- Project Metrics -->
+	<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+		<SummaryCard icon="◈" label="Sessions" value={formatNumber(data.sessions.length)} />
+		<SummaryCard icon="✉" label="Messages" value={formatNumber(data.metrics.totalMessages)} />
+		<SummaryCard icon="◎" label="Total Tokens" value={formatTokens(data.metrics.totalTokens)} />
+		<SummaryCard icon="◷" label="Time Spent" value={formatDuration(data.metrics.totalDurationMinutes)} />
+		<SummaryCard icon="⚙" label="Tool Calls" value={formatNumber(data.metrics.totalToolCalls)} />
+		<SummaryCard icon="⌀" label="Avg Session" value={formatDuration(data.sessions.length ? data.metrics.totalDurationMinutes / data.sessions.length : 0)} />
+	</div>
+
 	<!-- Filters -->
 	<div class="flex items-center gap-3">
 		<TerminalSearch bind:value={search} placeholder="Search sessions..." class="w-72" />
