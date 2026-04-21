@@ -10,32 +10,17 @@ export function listProjects(): Project[] {
 		.filter((d) => d.isDirectory())
 		.map((d) => d.name);
 
-	const metaMap = readAllSessionMeta();
 	const projects: Project[] = [];
 
 	for (const dir of dirs) {
 		const projectDir = join(PROJECTS_DIR, dir);
-		const jsonlFiles = readdirSync(projectDir).filter((f) => f.endsWith('.jsonl'));
-		if (jsonlFiles.length === 0) continue;
-
-		const decodedPath = decodeDirName(dir);
-
-		// Find the most recent mtime among session files
-		let lastActive = '';
-		for (const f of jsonlFiles) {
-			try {
-				const stat = statSync(join(projectDir, f));
-				const mtime = stat.mtime.toISOString();
-				if (!lastActive || mtime > lastActive) lastActive = mtime;
-			} catch {
-				// skip
-			}
-		}
+		const { sessionIds, lastActive } = collectProjectSessionSummary(projectDir);
+		if (sessionIds.size === 0) continue;
 
 		projects.push({
 			dirName: dir,
-			decodedPath,
-			sessionCount: jsonlFiles.length,
+			decodedPath: decodeDirName(dir),
+			sessionCount: sessionIds.size,
 			lastActive
 		});
 	}
@@ -43,6 +28,52 @@ export function listProjects(): Project[] {
 	// Sort by last active (most recent first)
 	projects.sort((a, b) => (b.lastActive > a.lastActive ? 1 : -1));
 	return projects;
+}
+
+/**
+ * Claude Code stores session metadata in two places that must be merged:
+ * - `<sessionId>.jsonl` files in the project dir (current sessions with full transcript)
+ * - `sessions-index.json` entries (older sessions whose .jsonl was archived/removed)
+ * Neither source is authoritative on its own: recent sessions may not yet appear in
+ * the index, and older sessions are only in the index. Dedupe by session id.
+ */
+function collectProjectSessionSummary(projectDir: string): {
+	sessionIds: Set<string>;
+	lastActive: string;
+} {
+	const sessionIds = new Set<string>();
+	let lastActive = '';
+
+	try {
+		const entries = readdirSync(projectDir);
+		for (const f of entries) {
+			if (!f.endsWith('.jsonl')) continue;
+			sessionIds.add(f.replace(/\.jsonl$/, ''));
+			try {
+				const mtime = statSync(join(projectDir, f)).mtime.toISOString();
+				if (mtime > lastActive) lastActive = mtime;
+			} catch {
+				// skip
+			}
+		}
+	} catch {
+		// skip
+	}
+
+	const indexPath = join(projectDir, 'sessions-index.json');
+	if (existsSync(indexPath)) {
+		try {
+			const index: SessionsIndex = JSON.parse(readFileSync(indexPath, 'utf-8'));
+			for (const e of index.entries) {
+				sessionIds.add(e.sessionId);
+				if (e.modified && e.modified > lastActive) lastActive = e.modified;
+			}
+		} catch {
+			// skip
+		}
+	}
+
+	return { sessionIds, lastActive };
 }
 
 export function getProjectDisplayName(dirName: string): string {
@@ -67,37 +98,43 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 	const projectDir = join(PROJECTS_DIR, dirName);
 	const indexPath = join(projectDir, 'sessions-index.json');
 	const metaMap = readAllSessionMeta();
-	const decodedPath = decodeDirName(dirName);
+	const sessions = new Map<string, SessionListItem>();
 
-	// Try sessions-index.json first
+	// 1. Pull entries from sessions-index.json (older, possibly archived sessions)
 	if (existsSync(indexPath)) {
 		try {
 			const index: SessionsIndex = JSON.parse(readFileSync(indexPath, 'utf-8'));
-			return index.entries.map((e) => {
+			for (const e of index.entries) {
 				const meta = metaMap.get(e.sessionId);
-				// Always parse JSONL for active-time duration
 				const jsonlPath = join(projectDir, `${e.sessionId}.jsonl`);
 				const parsed = existsSync(jsonlPath) ? parseJsonlInfo(jsonlPath) : undefined;
-				return mergeSessionData(e.sessionId, {
+				sessions.set(e.sessionId, mergeSessionData(e.sessionId, {
 					firstPrompt: e.firstPrompt,
 					summary: e.summary,
 					messageCount: e.messageCount,
 					created: e.created,
 					modified: e.modified,
 					gitBranch: e.gitBranch
-				}, meta, parsed);
-			}).sort((a, b) => (b.modified > a.modified ? 1 : -1));
+				}, meta, parsed));
+			}
 		} catch {
-			// Fall through to JSONL scan
+			// ignore malformed index; JSONL scan below still runs
 		}
 	}
 
-	// Fallback: scan JSONL files + match with session-meta
-	const jsonlFiles = readdirSync(projectDir).filter((f) => f.endsWith('.jsonl'));
-	const sessions: SessionListItem[] = [];
+	// 2. Scan JSONL files — these are the current/recent sessions that may not
+	//    yet be recorded in sessions-index.json. Skip ids already captured above.
+	let jsonlFiles: string[] = [];
+	try {
+		jsonlFiles = readdirSync(projectDir).filter((f) => f.endsWith('.jsonl'));
+	} catch {
+		jsonlFiles = [];
+	}
 
 	for (const file of jsonlFiles) {
-		const sessionId = file.replace('.jsonl', '');
+		const sessionId = file.replace(/\.jsonl$/, '');
+		if (sessions.has(sessionId)) continue;
+
 		const meta = metaMap.get(sessionId);
 		const filePath = join(projectDir, file);
 
@@ -111,13 +148,12 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 			// skip
 		}
 
-		// Parse JSONL for data (used as primary when meta unavailable, fallback otherwise)
 		const parsed = parseJsonlInfo(filePath);
 		const firstPrompt = meta?.first_prompt ?? parsed.firstPrompt;
 		const userCount = meta?.user_message_count ?? parsed.userCount;
 		const assistantCount = meta?.assistant_message_count ?? parsed.assistantCount;
 
-		sessions.push(mergeSessionData(sessionId, {
+		sessions.set(sessionId, mergeSessionData(sessionId, {
 			firstPrompt,
 			summary: meta?.summary ?? '',
 			messageCount: userCount + assistantCount,
@@ -127,8 +163,7 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 		}, meta, parsed));
 	}
 
-	sessions.sort((a, b) => (b.modified > a.modified ? 1 : -1));
-	return sessions;
+	return [...sessions.values()].sort((a, b) => (b.modified > a.modified ? 1 : -1));
 }
 
 interface ParsedJsonlInfo {

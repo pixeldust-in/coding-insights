@@ -6,7 +6,7 @@
 
 	let search = $state('');
 
-	let filtered = $derived(() => {
+	let filtered = $derived.by(() => {
 		if (!search) return data.history;
 		const q = search.toLowerCase();
 		return data.history.filter((h) => h.display.toLowerCase().includes(q));
@@ -54,7 +54,7 @@
 		return groups;
 	}
 
-	let grouped = $derived(groupByDate(filtered()));
+	let grouped = $derived(groupByDate(filtered));
 </script>
 
 <Header breadcrumbs={[{ label: 'History' }]} />
@@ -63,7 +63,7 @@
 	<div class="flex items-center gap-3">
 		<TerminalSearch bind:value={search} placeholder="Search prompts..." class="w-80" />
 		<span class="text-xs text-text-muted ml-auto">
-			{filtered().length} of {data.history.length} entries
+			{filtered.length} of {data.history.length} entries
 		</span>
 	</div>
 
@@ -92,7 +92,7 @@
 		</div>
 	{/each}
 
-	{#if search && filtered().length === 0}
+	{#if search && filtered.length === 0}
 		<div class="text-center py-12 text-text-muted text-sm">
 			No prompts matching "{search}"
 		</div>

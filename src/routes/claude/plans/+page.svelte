@@ -6,7 +6,7 @@
 
 	let search = $state('');
 
-	let filtered = $derived(() => {
+	let filtered = $derived.by(() => {
 		if (!search) return data.plans;
 		const q = search.toLowerCase();
 		return data.plans.filter(
@@ -36,12 +36,12 @@
 	<div class="flex items-center gap-3">
 		<TerminalSearch bind:value={search} placeholder="Search plans..." class="w-80" />
 		<span class="text-xs text-text-muted ml-auto">
-			{filtered().length} of {data.plans.length} plans
+			{filtered.length} of {data.plans.length} plans
 		</span>
 	</div>
 
 	<div class="space-y-2">
-		{#each filtered() as plan}
+		{#each filtered as plan}
 			<a
 				href="/claude/plans/{plan.name}"
 				class="block bg-surface border border-border-subtle rounded-xl p-5 hover:border-accent/50 transition-all group card-elevated"
@@ -67,7 +67,7 @@
 		</div>
 	{/if}
 
-	{#if search && filtered().length === 0}
+	{#if search && filtered.length === 0}
 		<div class="text-center py-12 text-text-muted text-sm">
 			No plans matching "{search}"
 		</div>

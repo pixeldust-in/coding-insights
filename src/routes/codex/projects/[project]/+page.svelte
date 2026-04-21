@@ -16,7 +16,7 @@
 		{ value: 'messages', label: 'Sort by Messages' }
 	];
 
-	let filtered = $derived(() => {
+	let filtered = $derived.by(() => {
 		let list = data.sessions;
 		if (search) {
 			const q = search.toLowerCase();
@@ -60,7 +60,7 @@
 
 	<!-- Session List -->
 	<div class="space-y-2">
-		{#each filtered() as session}
+		{#each filtered as session}
 			<a
 				href="/codex/sessions/{session.sessionId}"
 				class="block bg-surface border border-border-subtle rounded-xl p-4 hover:border-accent/50 transition-all group card-elevated"
@@ -85,7 +85,7 @@
 		{/each}
 	</div>
 
-	{#if search && filtered().length === 0}
+	{#if search && filtered.length === 0}
 		<div class="text-center py-12 text-text-muted text-sm">
 			No sessions matching "{search}"
 		</div>

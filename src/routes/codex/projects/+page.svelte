@@ -7,7 +7,7 @@
 
 	let search = $state('');
 
-	let filtered = $derived(() => {
+	let filtered = $derived.by(() => {
 		if (!search) return data.projects;
 		const q = search.toLowerCase();
 		return data.projects.filter(
@@ -25,12 +25,12 @@
 	<div class="flex items-center gap-3">
 		<TerminalSearch bind:value={search} placeholder="Search projects..." class="w-80" />
 		<span class="text-xs text-text-muted ml-auto">
-			{filtered().length} of {data.projects.length} projects
+			{filtered.length} of {data.projects.length} projects
 		</span>
 	</div>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-		{#each filtered() as project}
+		{#each filtered as project}
 			<a
 				href="/codex/projects/{encodeURIComponent(project.cwd)}"
 				class="bg-surface border border-border-subtle rounded-xl p-5 hover:border-accent/50 transition-all group card-elevated"
@@ -55,7 +55,7 @@
 		{/each}
 	</div>
 
-	{#if search && filtered().length === 0}
+	{#if search && filtered.length === 0}
 		<div class="text-center py-12 text-text-muted text-sm">
 			No projects matching "{search}"
 		</div>

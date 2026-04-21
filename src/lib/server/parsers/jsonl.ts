@@ -1,4 +1,4 @@
-import { createReadStream } from 'fs';
+import { createReadStream, existsSync } from 'fs';
 import { createInterface } from 'readline';
 import type { ConversationMessage, ContentBlock } from '../types.js';
 
@@ -31,6 +31,13 @@ export async function streamSessionMessages(
 	options: { offset?: number; limit?: number } = {}
 ): Promise<{ messages: ConversationMessage[]; totalCount: number }> {
 	const { offset = 0, limit = 50 } = options;
+
+	// Claude Code archives old session transcripts: only a sessions-index.json
+	// entry remains, no .jsonl file on disk. Return empty so callers can still
+	// show the index-level metadata instead of 500-ing.
+	if (!existsSync(filePath)) {
+		return { messages: [], totalCount: 0 };
+	}
 
 	// Phase 1: Stream through the file, collecting messages and deduplicating
 	const messagesById = new Map<string, ConversationMessage>();

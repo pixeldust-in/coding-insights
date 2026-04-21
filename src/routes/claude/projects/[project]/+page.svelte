@@ -16,7 +16,7 @@
 		{ value: 'messages', label: 'Sort by Messages' }
 	];
 
-	let metrics = $derived(() => {
+	let metrics = $derived.by(() => {
 		const sessions = data.sessions;
 		let messages = 0, tokens = 0, duration = 0, lines = 0;
 		for (const s of sessions) {
@@ -28,7 +28,7 @@
 		return { messages, tokens, duration, lines, avgDuration: sessions.length ? duration / sessions.length : 0 };
 	});
 
-	let filtered = $derived(() => {
+	let filtered = $derived.by(() => {
 		let list = data.sessions;
 		if (search) {
 			const q = search.toLowerCase();
@@ -57,11 +57,11 @@
 	<!-- Project Metrics -->
 	<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
 		<SummaryCard icon="◈" label="Sessions" value={formatNumber(data.sessions.length)} />
-		<SummaryCard icon="✉" label="Messages" value={formatNumber(metrics().messages)} />
-		<SummaryCard icon="◎" label="Total Tokens" value={formatTokens(metrics().tokens)} />
-		<SummaryCard icon="◷" label="Time Spent" value={formatDuration(metrics().duration)} />
-		<SummaryCard icon="±" label="Lines Changed" value={formatNumber(metrics().lines)} />
-		<SummaryCard icon="⌀" label="Avg Session" value={formatDuration(metrics().avgDuration)} />
+		<SummaryCard icon="✉" label="Messages" value={formatNumber(metrics.messages)} />
+		<SummaryCard icon="◎" label="Total Tokens" value={formatTokens(metrics.tokens)} />
+		<SummaryCard icon="◷" label="Time Spent" value={formatDuration(metrics.duration)} />
+		<SummaryCard icon="±" label="Lines Changed" value={formatNumber(metrics.lines)} />
+		<SummaryCard icon="⌀" label="Avg Session" value={formatDuration(metrics.avgDuration)} />
 	</div>
 
 	<!-- Filters -->
@@ -73,7 +73,7 @@
 
 	<!-- Session List -->
 	<div class="space-y-2">
-		{#each filtered() as session}
+		{#each filtered as session}
 			<a
 				href="/claude/projects/{encodeURIComponent(data.projectDir)}/{session.sessionId}"
 				class="block bg-surface border border-border-subtle rounded-xl p-4 hover:border-accent/50 transition-all group card-elevated"
