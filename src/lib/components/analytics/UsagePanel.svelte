@@ -28,22 +28,50 @@
 	let loading = $state(true);
 	let error: string | null = $state(null);
 	let spinning = $state(false);
+	let lastFetched: Date | null = $state(null);
+	let stale = $state(false);
+	let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function scheduleRetry(seconds: number) {
+		if (retryTimer) clearTimeout(retryTimer);
+		retryTimer = setTimeout(() => fetchUsage(), Math.max(5, seconds) * 1000);
+	}
+	function clearRetry() {
+		if (retryTimer) clearTimeout(retryTimer);
+		retryTimer = null;
+	}
 
 	async function fetchUsage() {
 		spinning = true;
-		error = null;
 		try {
 			const res = await fetch(apiUrl);
 			const data = await res.json();
+			const retryAfter = Number(data.retryAfter) || 60;
+
 			if (data.error) {
-				error = data.error;
-				usage = null;
+				// No usable data returned.
+				if (res.status === 429 || data.rateLimited) {
+					error = `Rate limited — retrying in ${retryAfter}s`;
+					scheduleRetry(retryAfter);
+				} else {
+					error = data.error;
+					clearRetry();
+				}
 			} else {
+				// Got usage (possibly served stale from cache during a throttle).
 				usage = data;
+				stale = Boolean(data.stale);
+				if (!stale) lastFetched = new Date();
+				if (data.rateLimited) {
+					error = null;
+					scheduleRetry(retryAfter);
+				} else {
+					error = null;
+					clearRetry();
+				}
 			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch usage';
-			usage = null;
 		} finally {
 			loading = false;
 			// Keep spin animation for at least 500ms for visual feedback
@@ -65,6 +93,14 @@
 		}
 	}
 
+	function agoLabel(date: Date): string {
+		try {
+			return `updated ${formatDistanceToNow(date, { addSuffix: true })}`;
+		} catch {
+			return '';
+		}
+	}
+
 	const windows = $derived.by(() => {
 		if (!usage) return [];
 		const entries: { label: string; data: UsageWindow }[] = [];
@@ -78,19 +114,29 @@
 		return entries;
 	});
 
-	// Fetch on mount
+	// Fetch on mount; cancel any pending retry on teardown
 	$effect(() => {
 		fetchUsage();
+		return () => clearRetry();
 	});
 </script>
 
-<div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
-	<div class="flex items-center justify-between mb-4">
-		<h3 class="text-sm font-semibold text-text-secondary">Live Usage</h3>
+<div class="relative overflow-hidden bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
+	<div class="flex items-center gap-2.5 mb-4">
+		<span class="relative flex w-[7px] h-[7px] shrink-0">
+			<span class="absolute inline-flex w-full h-full rounded-full bg-success opacity-60 animate-ping"></span>
+			<span class="relative inline-flex w-[7px] h-[7px] rounded-full bg-success"></span>
+		</span>
+		<h3 class="text-[13px] font-semibold text-text">Live Usage</h3>
+		{#if lastFetched}
+			<span class="ml-auto text-[11px] font-mono text-text-muted">
+				{agoLabel(lastFetched)}{#if stale}<span class="text-warning"> · cached</span>{/if}
+			</span>
+		{/if}
 		<button
 			onclick={fetchUsage}
 			disabled={spinning}
-			class="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors disabled:opacity-50"
+			class="{lastFetched ? '' : 'ml-auto'} p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors disabled:opacity-50"
 			title="Refresh usage data"
 		>
 			<svg
@@ -128,34 +174,41 @@
 			</svg>
 			Loading usage data...
 		</div>
-	{:else if error}
-		<div class="text-sm text-error py-2">
-			<span class="font-medium">Error:</span>
-			{error}
-		</div>
 	{:else if windows.length > 0}
-		<div class="grid grid-cols-3 gap-4">
+		<div
+			class="grid gap-x-8 gap-y-5"
+			style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));"
+		>
 			{#each windows as win}
 				{@const util = Math.round(win.data.utilization)}
 				{@const color = barColor(util)}
 				<div>
-					<div class="flex items-baseline justify-between mb-1.5">
-						<span class="text-xs font-medium text-text-secondary">{win.label}</span>
-						<span class="text-xs font-mono tabular-nums" style="color: {color}"
+					<div class="flex items-baseline justify-between mb-2">
+						<span class="text-[12.5px] font-semibold text-text">{win.label}</span>
+						<span class="text-[13px] font-mono font-semibold tabular-nums" style="color: {color}"
 							>{util}%</span
 						>
 					</div>
-					<div class="h-2 rounded-full bg-surface-raised overflow-hidden">
+					<div class="h-1.5 rounded-full bg-surface-raised overflow-hidden">
 						<div
 							class="h-full rounded-full transition-all duration-500"
 							style="width: {util}%; background: {color}"
 						></div>
 					</div>
 					{#if win.data.resets_at}
-						<p class="text-[10px] text-text-muted mt-1">{resetLabel(win.data.resets_at)}</p>
+						<p class="text-[10.5px] font-mono text-text-muted mt-2">{resetLabel(win.data.resets_at)}</p>
 					{/if}
 				</div>
 			{/each}
+		</div>
+	{:else if error}
+		<div class="text-sm py-2 {error.startsWith('Rate limited') ? 'text-warning' : 'text-error'}">
+			{#if error.startsWith('Rate limited')}
+				{error}
+			{:else}
+				<span class="font-medium">Error:</span>
+				{error}
+			{/if}
 		</div>
 	{:else}
 		<p class="text-sm text-text-muted py-2">No usage data available.</p>
