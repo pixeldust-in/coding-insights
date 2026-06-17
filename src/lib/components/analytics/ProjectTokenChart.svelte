@@ -24,6 +24,17 @@
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
 	let legendItems = $state<{ label: string; color: string }[]>([]);
+	let hidden = $state<boolean[]>([]);
+	let expanded = $state(false);
+	const COLLAPSED = 8;
+
+	function toggle(i: number) {
+		if (!chart) return;
+		const nowVisible = !chart.isDatasetVisible(i);
+		chart.setDatasetVisibility(i, nowVisible);
+		chart.update();
+		hidden[i] = !nowVisible;
+	}
 
 	onMount(() => {
 		if (!aggregated.length) return;
@@ -42,6 +53,7 @@
 		});
 
 		legendItems = projects.map((p, i) => ({ label: p, color: palette[i % palette.length] }));
+		hidden = legendItems.map(() => false);
 
 		const labels = aggregated.map((d) => formatPeriodLabel(d.date, period));
 
@@ -80,17 +92,27 @@
 				scales: {
 					x: {
 						stacked: true,
-						ticks: { color: theme.textMuted, font: { size: 10 }, maxTicksLimit: 15 },
-						grid: { color: theme.gridColor }
+						ticks: {
+							color: theme.textMuted,
+							font: { family: theme.fontMono, size: 10 },
+							maxRotation: 0,
+							autoSkip: true,
+							maxTicksLimit: 6
+						},
+						grid: { display: false },
+						border: { display: false }
 					},
 					y: {
 						stacked: true,
+						beginAtZero: true,
 						ticks: {
 							color: theme.textMuted,
-							font: { size: 10 },
+							font: { family: theme.fontMono, size: 10 },
+							maxTicksLimit: 5,
 							callback: (v) => formatTokenValue(Number(v))
 						},
-						grid: { color: theme.gridColor }
+						grid: { color: theme.gridColor, drawTicks: false },
+						border: { display: false }
 					}
 				}
 			}
@@ -103,13 +125,32 @@
 <div class="bg-surface border border-border-subtle rounded-xl p-5 card-elevated">
 	<h3 class="text-sm font-semibold text-text-secondary mb-2">{periodLabel(period)} Token Usage by Project</h3>
 	{#if legendItems.length}
-		<div class="flex flex-wrap gap-x-3 gap-y-1 mb-2 max-h-10 overflow-hidden">
-			{#each legendItems as item}
-				<span class="flex items-center gap-1.5 text-[10px] text-text-secondary whitespace-nowrap">
-					<span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:{item.color}"></span>
-					{item.label}
-				</span>
+		<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2">
+			{#each expanded ? legendItems : legendItems.slice(0, COLLAPSED) as item, i}
+				<button
+					type="button"
+					onclick={() => toggle(i)}
+					title={item.label}
+					class="flex items-center gap-1.5 text-[10px] font-mono cursor-pointer transition-opacity {hidden[i]
+						? 'text-text-muted opacity-60'
+						: 'text-text-secondary'}"
+				>
+					<span
+						class="w-2.5 h-2.5 rounded-sm shrink-0"
+						style="background:{hidden[i] ? 'transparent' : item.color}; box-shadow: inset 0 0 0 1.5px {item.color};"
+					></span>
+					<span class="max-w-[150px] truncate {hidden[i] ? 'line-through' : ''}">{item.label}</span>
+				</button>
 			{/each}
+			{#if legendItems.length > COLLAPSED}
+				<button
+					type="button"
+					onclick={() => (expanded = !expanded)}
+					class="text-[10px] font-mono text-accent hover:underline cursor-pointer"
+				>
+					{expanded ? 'Show less' : `+${legendItems.length - COLLAPSED} more`}
+				</button>
+			{/if}
 		</div>
 	{/if}
 	{#if data.length}

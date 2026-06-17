@@ -17,46 +17,47 @@ export function getChartTheme(element?: HTMLElement) {
 		warning: get('--color-warning') || '#D4A843',
 		error: get('--color-error') || '#D05858',
 		info: get('--color-info') || '#6A9FBF',
-		gridColor: hexToRgba(borderColor, 0.3)
+		gridColor: hexToRgba(borderColor, 0.45),
+		fontMono: get('--font-mono') || "'JetBrains Mono', monospace"
 	};
 }
 
-/** Warm palette for multi-series charts (Claude) */
+/** Carbon categorical palette (Claude) — clay lead + hue-separated supporting colors */
 export const chartPalette = [
-	'#DA7756', // terracotta
+	'#D97757', // clay (accent)
+	'#7AA2F7', // blue
+	'#5BAA6A', // green
 	'#D4A843', // amber
-	'#5BAA6A', // sage
-	'#6A9FBF', // slate blue
-	'#C07BAA', // mauve
-	'#8B7EC8', // lavender
-	'#E89070', // peach
-	'#A8B76A', // olive
-	'#D07070', // coral
+	'#B18CF2', // violet
 	'#7DBEAA', // teal
-	'#C49560', // caramel
-	'#90A4AE', // cool gray
+	'#E8709A', // rose
+	'#C07BAA', // mauve
+	'#6A9FBF', // slate blue
+	'#A8B76A', // olive
 	'#E8A87C', // apricot
+	'#8B7EC8', // lavender
+	'#C49560', // caramel
 	'#7BA5C0', // cerulean
-	'#B8886E'  // sienna
+	'#90A4AE'  // cool gray
 ];
 
-/** Cool palette for multi-series charts (Codex / OpenAI) */
+/** Carbon categorical palette (Codex) — OpenAI green lead + supporting hues */
 const codexPalette = [
-	'#10A37F', // teal (OpenAI green)
-	'#3b82f6', // blue
-	'#8b5cf6', // purple
-	'#f59e0b', // amber
-	'#ef4444', // red
-	'#06b6d4', // cyan
-	'#ec4899', // pink
-	'#84cc16', // lime
-	'#f97316', // orange
-	'#6366f1', // indigo
-	'#14b8a6', // teal alt
-	'#64748b', // slate
-	'#a855f7', // violet
-	'#0ea5e9', // sky
-	'#22c55e'  // green
+	'#10A37F', // green (OpenAI)
+	'#2563EB', // blue
+	'#7C3AED', // violet
+	'#D97706', // amber
+	'#0891B2', // cyan
+	'#E11D48', // rose
+	'#84CC16', // lime
+	'#EC4899', // pink
+	'#0EA5E9', // sky
+	'#6366F1', // indigo
+	'#F97316', // orange
+	'#14B8A6', // teal
+	'#A855F7', // purple
+	'#64748B', // slate
+	'#22C55E'  // emerald
 ];
 
 /** Get the appropriate chart palette based on the tool context */

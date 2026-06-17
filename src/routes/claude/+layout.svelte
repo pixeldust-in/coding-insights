@@ -9,6 +9,7 @@
 		{ label: 'Sessions', href: '/claude/sessions', icon: '◇' },
 		{ label: 'History', href: '/claude/history', icon: '↻' },
 		{ label: 'Plans', href: '/claude/plans', icon: '▤' },
+		{ section: 'Catalog' },
 		{ label: 'Skills', href: '/claude/skills', icon: '✦' },
 		{ label: 'Commands', href: '/claude/commands', icon: '⌘' },
 		{ label: 'Help', href: '/claude/help', icon: '?' },

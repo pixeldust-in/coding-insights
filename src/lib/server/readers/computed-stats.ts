@@ -175,8 +175,11 @@ async function scanSessionFile(filePath: string, sessionId: string): Promise<Ses
 			}
 			assistantCount++;
 
+			// Skip synthetic/placeholder "models" like "<synthetic>" — these are
+			// locally-generated error/system turns (API errors, interruptions) with
+			// zero token usage, not real model inferences. Real model ids never start with "<".
 			const model = msg.model;
-			if (model) {
+			if (model && !model.startsWith('<')) {
 				const totals = (scan.modelUsage[model] ??= {
 					input: 0,
 					output: 0,

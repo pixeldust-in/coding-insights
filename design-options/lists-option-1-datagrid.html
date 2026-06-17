@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lists — Option 1 · Data Grid</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d;--panel:#101216;--panel-2:#15181e;--line:#1e2228;--line-2:#262b33;
+    --text:#e6e9ee;--text-dim:#8b929e;--text-faint:#5a616c;
+    --accent:#d97757;--accent-2:#e8a87c;--green:#6ee7a8;--amber:#f5c451;--blue:#7aa2f7;--violet:#b18cf2;
+    --mono:'JetBrains Mono',monospace;--sans:'Inter Tight',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;display:flex;min-height:100vh}
+  /* sidebar (compact, just for context) */
+  .sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--line);background:linear-gradient(180deg,#0c0e11,#0a0b0d);display:flex;flex-direction:column;padding:16px 12px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 18px}
+  .brand .logo{width:28px;height:28px;border-radius:7px;background:radial-gradient(circle at 30% 30%,var(--accent-2),var(--accent));display:grid;place-items:center;color:#1a0e08;font-weight:800;font-size:14px}
+  .brand b{font-size:14px;font-weight:700}
+  .brand small{display:block;font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+  .nav a{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;color:var(--text-dim);text-decoration:none;font-size:13px;font-weight:500;margin-bottom:1px}
+  .nav a.active{background:var(--panel-2);color:var(--text);box-shadow:inset 2px 0 0 var(--accent)}
+  .nav a:hover:not(.active){background:var(--panel);color:var(--text)}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;background:rgba(10,11,13,.8);backdrop-filter:blur(10px);z-index:5}
+  .crumbs{font-family:var(--mono);font-size:13px;color:var(--text-dim)}
+  .crumbs b{color:var(--text)}
+  .content{padding:22px 24px 60px;max-width:1280px;width:100%;margin:0 auto}
+
+  /* page switch tabs */
+  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+  .tabs button{background:none;border:none;color:var(--text-dim);font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:7px 11px;width:300px;color:var(--text-faint);font-family:var(--mono);font-size:12.5px}
+  .search input{background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12.5px;flex:1}
+  .pill{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:7px 11px;color:var(--text-dim);font-family:var(--mono);font-size:12px;cursor:pointer}
+  .count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text-faint)}
+
+  /* table */
+  .grid{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);font-weight:600;padding:11px 16px;background:var(--panel-2);border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+  thead th .arr{color:var(--accent);margin-left:4px}
+  tbody tr{border-bottom:1px solid var(--line);transition:background .12s;cursor:pointer}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--panel-2)}
+  td{padding:12px 16px;font-size:13px;vertical-align:middle}
+  .tnum{font-family:var(--mono);font-size:12.5px;text-align:right;color:var(--text-dim);font-variant-numeric:tabular-nums}
+  .pname{font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px}
+  .pdot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+  .ppath{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar{display:inline-block;height:6px;border-radius:3px;background:var(--accent);vertical-align:middle}
+  .bartrack{display:inline-block;width:70px;height:6px;border-radius:3px;background:var(--line-2);vertical-align:middle;margin-right:8px;overflow:hidden}
+  .chip{font-family:var(--mono);font-size:10.5px;color:var(--accent);background:rgba(217,119,87,.1);border:1px solid rgba(217,119,87,.22);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .chip.gray{color:var(--text-dim);background:var(--panel-2);border-color:var(--line-2)}
+  .chip.green{color:var(--green);background:rgba(110,231,168,.08);border-color:rgba(110,231,168,.2)}
+  .chip.amber{color:var(--amber);background:rgba(245,196,81,.08);border-color:rgba(245,196,81,.2)}
+  .ago{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);white-space:nowrap}
+  .prompt{color:var(--text);font-weight:500;max-width:560px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .msgcell{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+  .hide{display:none}
+  .note{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">✳</div><div><b>Claude Code</b><small>insights</small></div></div>
+    <nav class="nav">
+      <a href="#">◈ Dashboard</a>
+      <a href="#" class="active" id="navP" onclick="show('projects')">◫ Projects</a>
+      <a href="#" id="navS" onclick="show('sessions')">◇ Sessions</a>
+      <a href="#">↻ History</a>
+      <a href="#">▤ Plans</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar"><div class="crumbs"><b id="crumb">projects</b></div></div>
+    <div class="content">
+      <div class="tabs">
+        <button id="tabP" class="on" onclick="show('projects')">Projects</button>
+        <button id="tabS" onclick="show('sessions')">Sessions</button>
+      </div>
+
+      <!-- ===== PROJECTS ===== -->
+      <section id="projects">
+        <div class="toolbar">
+          <div class="search">› <input placeholder="Filter projects…"></div>
+          <div class="pill">Sort: Activity ▾</div>
+          <span class="count">32 projects</span>
+        </div>
+        <div class="grid">
+          <table>
+            <thead>
+              <tr>
+                <th>Project <span class="arr">▾</span></th>
+                <th>Path</th>
+                <th style="text-align:right">Sessions</th>
+                <th style="text-align:right">Tokens</th>
+                <th style="text-align:right">Last Active</th>
+              </tr>
+            </thead>
+            <tbody id="ptbody"></tbody>
+          </table>
+        </div>
+        <div class="note">// click a row to open the project · sortable columns · 32 of 32 shown</div>
+      </section>
+
+      <!-- ===== SESSIONS ===== -->
+      <section id="sessions" class="hide">
+        <div class="toolbar">
+          <div class="search">› <input placeholder="Search sessions…"></div>
+          <div class="pill">All Projects ▾</div>
+          <div class="pill">Sort: Date ▾</div>
+          <span class="count">288 sessions</span>
+        </div>
+        <div class="grid">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:48%">Prompt</th>
+                <th>Project</th>
+                <th style="text-align:right">Messages</th>
+                <th style="text-align:right">Duration</th>
+                <th style="text-align:right">When</th>
+              </tr>
+            </thead>
+            <tbody id="stbody"></tbody>
+          </table>
+        </div>
+        <div class="note">// click a row to open the session transcript</div>
+      </section>
+    </div>
+  </div>
+<script>
+  const COLORS=['#d97757','#7aa2f7','#6ee7a8','#f5c451','#b18cf2','#e8709a'];
+  const projects=[
+    ['pixeldust/vibecoding/claude/dashboard','/Users/mohammed/work/pixeldust/vibecoding/claude-dashboard',3,'12.4M','1 min ago'],
+    ['benepower/benepower/backend','/Users/mohammed/work/pixeldust/benepower/benepower/backend',35,'182M','2 days ago'],
+    ['ans/solver/codebase','/Users/mohammed/work/pixeldust/ans/solver/codebase',33,'164M','2 days ago'],
+    ['iias/vms','/Users/mohammed/work/pixeldust/iias/vms',17,'78.1M','15 hours ago'],
+    ['mohammed','/Users/mohammed',13,'52.0M','2 hours ago'],
+    ['frappe/solas/bench','/Users/mohammed/work/pixeldust/frappe/solas/bench/apps',11,'44.3M','19 hours ago'],
+    ['learning','/Users/mohammed/personal/learning',4,'9.8M','19 hours ago'],
+    ['finance/thewrapbot','/Users/mohammed/personal/finance/thewrapbot',3,'7.2M','19 hours ago'],
+    ['benepower','/Users/mohammed/work/pixeldust/benepower',2,'5.1M','15 hours ago'],
+    ['frappe/Solas/ERPNext','/Users/mohammed/work/pixeldust/frappe/Solas/ERPNext',2,'4.4M','4 days ago'],
+    ['erpnext/erp/finance/agent','/Users/mohammed/work/pixeldust/erpnext/erp/finance/agent',1,'2.1M','17 hours ago'],
+    ['dripcapital','/Users/mohammed/work/pixeldust/dripcapital',1,'1.3M','5 days ago'],
+  ];
+  const maxS=Math.max(...projects.map(p=>p[2]));
+  const ptb=document.getElementById('ptbody');
+  projects.forEach((p,i)=>{
+    const pct=Math.round(p[2]/maxS*100);
+    const c=COLORS[i%COLORS.length];
+    ptb.insertAdjacentHTML('beforeend',`<tr>
+      <td><span class="pname"><span class="pdot" style="background:${c}"></span>${p[0]}</span></td>
+      <td><span class="ppath">${p[1]}</span></td>
+      <td class="tnum"><span class="bartrack"><span class="bar" style="width:${pct}%;background:${c}"></span></span>${p[2]}</td>
+      <td class="tnum">${p[3]}</td>
+      <td class="tnum"><span class="ago">${p[4]}</span></td>
+    </tr>`);
+  });
+
+  const sessions=[
+    ['I am not really happy with the current UI/UX of the app. Please generate 3 UI options…','vibecoding/claude/dashboard','accent',168,'36m','1 min ago'],
+    ['Lately my machine has been crashing very often mainly due to memory usage. Deep introspection…','mohammed','gray',152,'40m','2 hours ago'],
+    ['grill-me · Just like how we are creating Plans and Benefits, build a similar flow for…','benepower','amber',413,'1h 58m','19 hours ago'],
+    ['Can you check why am i getting this issue where the UI is not able to render benefit docs…','benepower','green',207,'42m','15 hours ago'],
+    ['We have configured a T-5 day alerts for meetings where voting is done by UTI MF (fundhouse 212)…','iias/vms','gray',196,'36m','15 hours ago'],
+    ['Can you check why is it that some of the charts are coming as blank lately for claude code usage','vibecoding/claude/dashboard','green',75,'15m','2 hours ago'],
+    ['on the session detail page, can we also render the session id and add copy to clipboard…','vibecoding/claude/dashboard','accent',50,'11m','2 hours ago'],
+    ['how to build and run this app locally? both frontend and backend along with creating initial user','erpnext/finance/agent','gray',33,'11m','17 hours ago'],
+  ];
+  const stb=document.getElementById('stbody');
+  sessions.forEach(s=>{
+    stb.insertAdjacentHTML('beforeend',`<tr>
+      <td><div class="prompt">${s[0]}</div></td>
+      <td><span class="chip ${s[2]==='accent'?'':s[2]}">${s[1]}</span></td>
+      <td class="tnum">${s[3]}</td>
+      <td class="tnum">${s[4]}</td>
+      <td class="tnum"><span class="ago">${s[5]}</span></td>
+    </tr>`);
+  });
+
+  function show(which){
+    document.getElementById('projects').classList.toggle('hide',which!=='projects');
+    document.getElementById('sessions').classList.toggle('hide',which!=='sessions');
+    document.getElementById('tabP').classList.toggle('on',which==='projects');
+    document.getElementById('tabS').classList.toggle('on',which==='sessions');
+    document.getElementById('navP').classList.toggle('active',which==='projects');
+    document.getElementById('navS').classList.toggle('active',which==='sessions');
+    document.getElementById('crumb').textContent=which;
+  }
+</script>
+</body>
+</html>

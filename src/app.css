@@ -1,48 +1,48 @@
 @import 'tailwindcss';
 
-/* ─── Claude Brand Theme ─── */
+/* ─── Carbon Theme · Claude (dark default) ─── */
 @theme {
-	/* Dark mode (default) */
-	--color-bg: #1B1612;
-	--color-surface: #251F19;
-	--color-surface-hover: #302921;
-	--color-surface-raised: #3A3129;
-	--color-border: #443A30;
-	--color-border-subtle: #302921;
-	--color-text: #EDE8E3;
-	--color-text-secondary: #B5ADA4;
-	--color-text-muted: #7D7369;
-	--color-accent: #DA7756;
-	--color-accent-hover: #E8926F;
+	/* Dark mode (default) — cool near-black IDE palette */
+	--color-bg: #0A0B0D;
+	--color-surface: #101216;
+	--color-surface-hover: #15181E;
+	--color-surface-raised: #1B1F26;
+	--color-border: #262B33;
+	--color-border-subtle: #1E2228;
+	--color-text: #E6E9EE;
+	--color-text-secondary: #8B929E;
+	--color-text-muted: #5A616C;
+	--color-accent: #D97757;
+	--color-accent-hover: #E8A87C;
 	--color-accent-muted: #C4613E;
-	--color-accent-glow: rgba(218, 119, 86, 0.15);
-	--color-success: #5BAA6A;
-	--color-warning: #D4A843;
-	--color-error: #D05858;
-	--color-info: #6A9FBF;
-	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--color-accent-glow: rgba(217, 119, 87, 0.15);
+	--color-success: #6EE7A8;
+	--color-warning: #F5C451;
+	--color-error: #F07A6F;
+	--color-info: #7AA2F7;
+	--font-sans: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
 }
 
-/* ─── Light Mode Overrides (matches Claude.ai aesthetic) ─── */
+/* ─── Carbon Theme · Claude (light) ─── */
 html.light {
-	--color-bg: #EEEBE6;
-	--color-surface: #FAFAF8;
-	--color-surface-hover: #F0ECE7;
-	--color-surface-raised: #E5E0DA;
-	--color-border: #D8D2CA;
-	--color-border-subtle: #E5E0DA;
-	--color-text: #2D2118;
-	--color-text-secondary: #6B5D51;
-	--color-text-muted: #998B7D;
-	--color-accent: #C96442;
-	--color-accent-hover: #B55636;
-	--color-accent-muted: #DA7756;
-	--color-accent-glow: rgba(201, 100, 66, 0.12);
-	--color-success: #4A8F58;
-	--color-warning: #B8922A;
-	--color-error: #C04040;
-	--color-info: #4A7F9F;
+	--color-bg: #F7F7F5;
+	--color-surface: #FFFFFF;
+	--color-surface-hover: #F1F1EE;
+	--color-surface-raised: #EBEAE5;
+	--color-border: #DCDBD4;
+	--color-border-subtle: #E7E6E1;
+	--color-text: #1B1C1E;
+	--color-text-secondary: #5F636B;
+	--color-text-muted: #9A9EA7;
+	--color-accent: #C2410C;
+	--color-accent-hover: #A8380A;
+	--color-accent-muted: #D97757;
+	--color-accent-glow: rgba(194, 65, 12, 0.10);
+	--color-success: #1A7F54;
+	--color-warning: #B07407;
+	--color-error: #C0403C;
+	--color-info: #2563A8;
 }
 
 /* ─── Neutral Homepage Theme ─── */
@@ -70,47 +70,46 @@ html.light [data-page="home"] {
 	--color-accent: #525252;
 }
 
-/* ─── Codex CLI Theme (OpenAI-inspired) ─── */
+/* ─── Carbon Theme · Codex (dark) ─── */
 [data-tool="codex"] {
-	--color-bg: #0d0d0d;
-	--color-surface: #171717;
-	--color-surface-hover: #1e1e1e;
-	--color-surface-raised: #262626;
-	--color-border: #333333;
-	--color-border-subtle: #1e1e1e;
-	--color-text: #ececec;
-	--color-text-secondary: #a1a1a1;
-	--color-text-muted: #6e6e6e;
+	--color-bg: #0A0C0B;
+	--color-surface: #0F1311;
+	--color-surface-hover: #141A17;
+	--color-surface-raised: #1A221D;
+	--color-border: #26302B;
+	--color-border-subtle: #1C2320;
+	--color-text: #E7ECE9;
+	--color-text-secondary: #8C968F;
+	--color-text-muted: #586059;
 	--color-accent: #10A37F;
-	--color-accent-hover: #1abc94;
-	--color-accent-muted: #0d8c6d;
+	--color-accent-hover: #1FC99C;
+	--color-accent-muted: #0D8C6D;
 	--color-accent-glow: rgba(16, 163, 127, 0.15);
-	--color-success: #10A37F;
-	--color-warning: #f0b429;
-	--color-error: #ef4444;
-	--color-info: #3b82f6;
-	--font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-	--font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+	--color-success: #5FE3A1;
+	--color-warning: #F5C451;
+	--color-error: #EF6D6D;
+	--color-info: #5AA9E6;
 }
 
+/* ─── Carbon Theme · Codex (light) ─── */
 html.light [data-tool="codex"] {
-	--color-bg: #f7f7f8;
-	--color-surface: #ffffff;
-	--color-surface-hover: #f0f0f1;
-	--color-surface-raised: #e8e8ea;
-	--color-border: #d9d9e3;
-	--color-border-subtle: #e8e8ea;
-	--color-text: #1a1a1a;
-	--color-text-secondary: #565869;
-	--color-text-muted: #8e8ea0;
-	--color-accent: #10A37F;
-	--color-accent-hover: #0d8c6d;
-	--color-accent-muted: #1abc94;
-	--color-accent-glow: rgba(16, 163, 127, 0.12);
-	--color-success: #0d8c6d;
-	--color-warning: #d49e0a;
-	--color-error: #dc2626;
-	--color-info: #2563eb;
+	--color-bg: #F6F7F6;
+	--color-surface: #FFFFFF;
+	--color-surface-hover: #EEF1EF;
+	--color-surface-raised: #E7EBE8;
+	--color-border: #D6DCD8;
+	--color-border-subtle: #E4E8E5;
+	--color-text: #161A18;
+	--color-text-secondary: #5B635E;
+	--color-text-muted: #969D98;
+	--color-accent: #0D8C6D;
+	--color-accent-hover: #0A7057;
+	--color-accent-muted: #10A37F;
+	--color-accent-glow: rgba(13, 140, 109, 0.10);
+	--color-success: #0F7A52;
+	--color-warning: #A9700A;
+	--color-error: #DC2626;
+	--color-info: #2563EB;
 }
 
 @layer base {
@@ -118,8 +117,13 @@ html.light [data-tool="codex"] {
 		background-color: var(--color-bg);
 		color: var(--color-text);
 		font-family: var(--font-sans);
+		color-scheme: dark;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+	}
+
+	html.light {
+		color-scheme: light;
 	}
 
 	body {

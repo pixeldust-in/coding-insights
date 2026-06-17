@@ -7,6 +7,7 @@
 	import ToolUsageChart from '$components/analytics/ToolUsageChart.svelte';
 	import LanguageChart from '$components/analytics/LanguageChart.svelte';
 	import HourHeatmap from '$components/analytics/HourHeatmap.svelte';
+	import ContributionHeatmap from '$components/analytics/ContributionHeatmap.svelte';
 	import ProjectActivityChart from '$components/analytics/ProjectActivityChart.svelte';
 	import ProjectTokenChart from '$components/analytics/ProjectTokenChart.svelte';
 	import { formatNumber, formatTokens } from '$utils/format.js';
@@ -14,6 +15,16 @@
 
 	let { data } = $props();
 	let period = $state<TimePeriod>('week');
+
+	const SPARK_N = 16;
+	let sessionsSpark = $derived(data.stats.dailyActivity.map((d) => d.sessionCount).slice(-SPARK_N));
+	let messagesSpark = $derived(data.stats.dailyActivity.map((d) => d.messageCount).slice(-SPARK_N));
+	let tokensSpark = $derived(
+		data.stats.dailyModelTokens
+			.map((d) => Object.values(d.tokensByModel).reduce((s, v) => s + (v as number), 0))
+			.slice(-SPARK_N)
+	);
+	let toolSpark = $derived(data.stats.dailyActivity.map((d) => d.toolCallCount).slice(-SPARK_N));
 </script>
 
 <Header title="Dashboard" />
@@ -29,22 +40,32 @@
 			label="Total Sessions"
 			value={formatNumber(data.stats.totalSessions)}
 			subtitle="Since {new Date(data.stats.firstSessionDate).toLocaleDateString()}"
+			spark={sessionsSpark}
+			tone="accent"
 		/>
 		<SummaryCard
 			icon="✉"
 			label="Total Messages"
 			value={formatNumber(data.stats.totalMessages)}
+			subtitle="Across all sessions"
+			spark={messagesSpark}
+			tone="success"
 		/>
 		<SummaryCard
 			icon="◎"
 			label="Total Tokens"
 			value={formatTokens(data.totalTokens)}
 			subtitle="Across all models"
+			spark={tokensSpark}
+			tone="info"
 		/>
 		<SummaryCard
 			icon="◆"
 			label="Active Days"
 			value={data.activeDays}
+			subtitle="Days with activity"
+			spark={toolSpark}
+			tone="warning"
 		/>
 	</div>
 
@@ -66,6 +87,9 @@
 			{/each}
 		</div>
 	</div>
+
+	<!-- Contribution Heatmap -->
+	<ContributionHeatmap data={data.stats.dailyActivity} unit="messages" />
 
 	<!-- Charts Row 1 -->
 	<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">

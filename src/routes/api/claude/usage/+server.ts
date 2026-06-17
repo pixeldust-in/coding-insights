@@ -2,15 +2,26 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { execSync } from 'child_process';
 
+// Anthropic's OAuth usage endpoint is rate-limited by request frequency, so we
+// cache the last successful response briefly. Repeated dashboard loads/refreshes
+// reuse the cache instead of each hitting the API (which would trip a 429).
+const TTL_MS = 60_000;
+let cache: { data: Record<string, unknown>; ts: number } | null = null;
+
 export const GET: RequestHandler = async () => {
+	// Serve fresh-enough cached usage without calling Anthropic at all.
+	if (cache && Date.now() - cache.ts < TTL_MS) {
+		return json({ ...cache.data, cachedAgeMs: Date.now() - cache.ts });
+	}
+
 	try {
 		// Read OAuth token from macOS Keychain
 		let credentials: string;
 		try {
-			credentials = execSync(
-				'security find-generic-password -s "Claude Code-credentials" -w',
-				{ encoding: 'utf-8', timeout: 5000 }
-			).trim();
+			credentials = execSync('security find-generic-password -s "Claude Code-credentials" -w', {
+				encoding: 'utf-8',
+				timeout: 5000
+			}).trim();
 		} catch {
 			return json({ error: 'Could not read OAuth token from Keychain' }, { status: 401 });
 		}
@@ -38,18 +49,28 @@ export const GET: RequestHandler = async () => {
 		});
 
 		if (!response.ok) {
+			const retryAfter = Number(response.headers.get('retry-after')) || null;
+			const rateLimited = response.status === 429;
+
+			// Fall back to the last known-good usage so the panel stays populated
+			// instead of blanking out on a transient throttle.
+			if (cache) {
+				return json({ ...cache.data, stale: true, rateLimited, retryAfter });
+			}
 			return json(
-				{ error: `API request failed: ${response.status}` },
+				{ error: `API request failed: ${response.status}`, rateLimited, retryAfter },
 				{ status: response.status }
 			);
 		}
 
-		const usage = await response.json();
+		const usage = (await response.json()) as Record<string, unknown>;
+		cache = { data: usage, ts: Date.now() };
 		return json(usage);
 	} catch (err) {
-		return json(
-			{ error: err instanceof Error ? err.message : 'Unknown error' },
-			{ status: 500 }
-		);
+		// Network/other failure — serve stale cache if we have any.
+		if (cache) {
+			return json({ ...cache.data, stale: true });
+		}
+		return json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
 	}
 };
