@@ -157,19 +157,19 @@ html.light [data-tool="codex"] {
 
 /* ─── Diff View ─── */
 .diff-line-added {
-	background-color: rgba(46, 160, 67, 0.15);
+	background-color: rgba(46, 160, 67, 0.30);
 }
 
 .diff-line-removed {
-	background-color: rgba(248, 81, 73, 0.15);
+	background-color: rgba(248, 81, 73, 0.30);
 }
 
 html.light .diff-line-added {
-	background-color: rgba(46, 160, 67, 0.12);
+	background-color: rgba(46, 160, 67, 0.22);
 }
 
 html.light .diff-line-removed {
-	background-color: rgba(248, 81, 73, 0.10);
+	background-color: rgba(248, 81, 73, 0.20);
 }
 
 .diff-gutter {
@@ -199,19 +199,19 @@ html.light .diff-marker-remove {
 }
 
 .diff-line-added:hover {
-	background-color: rgba(46, 160, 67, 0.25);
+	background-color: rgba(46, 160, 67, 0.40);
 }
 
 .diff-line-removed:hover {
-	background-color: rgba(248, 81, 73, 0.25);
+	background-color: rgba(248, 81, 73, 0.40);
 }
 
 html.light .diff-line-added:hover {
-	background-color: rgba(46, 160, 67, 0.20);
+	background-color: rgba(46, 160, 67, 0.30);
 }
 
 html.light .diff-line-removed:hover {
-	background-color: rgba(248, 81, 73, 0.18);
+	background-color: rgba(248, 81, 73, 0.28);
 }
 
 /* ─── Light Mode: soft shadows for cards ─── */
