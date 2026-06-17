@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
 	import Badge from '$components/shared/Badge.svelte';
+	import SessionId from '$components/shared/SessionId.svelte';
 	import MessageThread from '$components/conversation/MessageThread.svelte';
 	import { formatTokens, formatDuration, formatNumber } from '$utils/format.js';
 	import type { ConversationMessage } from '$lib/server/types.js';
@@ -35,10 +36,15 @@
 			<p class="text-sm font-medium truncate">
 				{data.meta?.summary || data.firstPrompt}
 			</p>
-			<div class="flex items-center gap-4 mt-2 text-xs text-text-muted">
+			<div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-text-muted">
 				<span>{data.totalCount} messages</span>
 				<Badge variant="accent">{data.displayName}</Badge>
+				<SessionId sessionId={data.sessionId} />
 			</div>
+		</div>
+	{:else}
+		<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
+			<SessionId sessionId={data.sessionId} />
 		</div>
 	{/if}
 

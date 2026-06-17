@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$components/layout/Header.svelte';
 	import Badge from '$components/shared/Badge.svelte';
+	import SessionId from '$components/shared/SessionId.svelte';
 	import MessageThread from '$components/conversation/MessageThread.svelte';
 	import type { ConversationMessage } from '$lib/server/types.js';
 
@@ -29,18 +30,19 @@
 
 <div class="p-6 space-y-6">
 	<!-- Session Meta Bar -->
-	{#if data.meta}
-		<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
-			<div class="flex flex-wrap items-center gap-3">
+	<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
+		<div class="flex flex-wrap items-center gap-3">
+			{#if data.meta}
 				<Badge variant="accent">{data.meta.projectName}</Badge>
 				{#if data.meta.model}
 					<Badge>{data.meta.model}</Badge>
 				{/if}
 				<span class="text-xs text-text-muted">{data.meta.messageCount} messages</span>
 				<span class="text-xs text-text-muted font-mono">{data.meta.cwd}</span>
-			</div>
+			{/if}
+			<SessionId sessionId={data.sessionId} />
 		</div>
-	{/if}
+	</div>
 
 	<!-- Messages -->
 	<MessageThread messages={allMessages} {totalCount} onLoadMore={loadMore} />
