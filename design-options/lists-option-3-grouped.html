@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lists — Option 3 · Cards + Timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d;--panel:#101216;--panel-2:#15181e;--line:#1e2228;--line-2:#262b33;
+    --text:#e6e9ee;--text-dim:#8b929e;--text-faint:#5a616c;
+    --accent:#d97757;--accent-2:#e8a87c;--green:#6ee7a8;--amber:#f5c451;--blue:#7aa2f7;--violet:#b18cf2;
+    --mono:'JetBrains Mono',monospace;--sans:'Inter Tight',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;display:flex;min-height:100vh}
+  .sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--line);background:linear-gradient(180deg,#0c0e11,#0a0b0d);display:flex;flex-direction:column;padding:16px 12px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 18px}
+  .brand .logo{width:28px;height:28px;border-radius:7px;background:radial-gradient(circle at 30% 30%,var(--accent-2),var(--accent));display:grid;place-items:center;color:#1a0e08;font-weight:800;font-size:14px}
+  .brand b{font-size:14px;font-weight:700}
+  .brand small{display:block;font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+  .nav a{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;color:var(--text-dim);text-decoration:none;font-size:13px;font-weight:500;margin-bottom:1px}
+  .nav a.active{background:var(--panel-2);color:var(--text);box-shadow:inset 2px 0 0 var(--accent)}
+  .nav a:hover:not(.active){background:var(--panel);color:var(--text)}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;background:rgba(10,11,13,.8);backdrop-filter:blur(10px);z-index:5}
+  .crumbs{font-family:var(--mono);font-size:13px;color:var(--text-dim)}.crumbs b{color:var(--text)}
+  .content{padding:22px 24px 60px;max-width:1240px;width:100%;margin:0 auto}
+  .tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .tabs button{background:none;border:none;color:var(--text-dim);font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 12px;width:300px;color:var(--text-faint);font-family:var(--mono);font-size:12.5px}
+  .search input{background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12.5px;flex:1}
+  .pill{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:8px 12px;color:var(--text-dim);font-family:var(--mono);font-size:12px;cursor:pointer}
+  .count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text-faint)}
+  .hide{display:none}
+
+  /* PROJECTS — dense accent cards */
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .pcard{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;cursor:pointer;transition:.14s;overflow:hidden}
+  .pcard:hover{transform:translateY(-2px);border-color:var(--line-2)}
+  .pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:11px 0 0 11px}
+  .pcard .ptop{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+  .pcard .pico{width:24px;height:24px;border-radius:6px;flex-shrink:0;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:10px;color:#0a0b0d}
+  .pcard .pname{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pcard .ppath{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:13px}
+  .pcard .prow{display:flex;align-items:center;gap:8px}
+  .pchip{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);background:var(--panel-2);border:1px solid var(--line-2);border-radius:5px;padding:2px 7px}
+  .pchip b{color:var(--text);font-weight:600}
+  .pcard .pago{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--text-faint)}
+
+  /* SESSIONS — date-grouped timeline */
+  .daygroup{margin-bottom:8px}
+  .dayhead{display:flex;align-items:center;gap:10px;padding:14px 2px 8px}
+  .dayhead .dl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);font-weight:600}
+  .dayhead .dc{font-family:var(--mono);font-size:10.5px;color:var(--text-faint)}
+  .dayhead .dline{flex:1;height:1px;background:var(--line)}
+  .tl{position:relative;padding-left:18px}
+  .tl::before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:1px;background:var(--line)}
+  .srow{position:relative;display:flex;gap:14px;align-items:flex-start;padding:11px 14px;border-radius:10px;cursor:pointer;transition:background .12s}
+  .srow:hover{background:var(--panel)}
+  .srow::before{content:"";position:absolute;left:-14px;top:18px;width:7px;height:7px;border-radius:50%;border:2px solid var(--bg)}
+  .smain{min-width:0;flex:1}
+  .sprompt{font-weight:500;font-size:13.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ssub{display:flex;align-items:center;gap:11px;margin-top:6px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:10.5px;border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .meta{font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:5px}
+  .dot{width:3px;height:3px;border-radius:50%;background:var(--text-faint)}
+  .sright{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+  .badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px}
+  .badge.done{color:var(--green);background:rgba(110,231,168,.1)}
+  .badge.partial{color:var(--amber);background:rgba(245,196,81,.1)}
+  .stime{font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">✳</div><div><b>Claude Code</b><small>insights</small></div></div>
+    <nav class="nav">
+      <a href="#">◈ Dashboard</a>
+      <a href="#" class="active" id="navP" onclick="show('projects')">◫ Projects</a>
+      <a href="#" id="navS" onclick="show('sessions')">◇ Sessions</a>
+      <a href="#">↻ History</a>
+      <a href="#">▤ Plans</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="topbar"><div class="crumbs"><b id="crumb">projects</b></div></div>
+    <div class="content">
+      <div class="tabs">
+        <button id="tabP" class="on" onclick="show('projects')">Projects</button>
+        <button id="tabS" onclick="show('sessions')">Sessions</button>
+      </div>
+
+      <!-- PROJECTS -->
+      <section id="projects">
+        <div class="toolbar">
+          <div class="search">› <input placeholder="Filter projects…"></div>
+          <div class="pill">Sort: Activity ▾</div>
+          <span class="count">32 projects</span>
+        </div>
+        <div class="pgrid" id="pgrid"></div>
+      </section>
+
+      <!-- SESSIONS -->
+      <section id="sessions" class="hide">
+        <div class="toolbar">
+          <div class="search">› <input placeholder="Search sessions…"></div>
+          <div class="pill">All Projects ▾</div>
+          <span class="count">288 sessions</span>
+        </div>
+        <div id="sgroups"></div>
+      </section>
+    </div>
+  </div>
+<script>
+  const COLORS=['#d97757','#7aa2f7','#6ee7a8','#f5c451','#b18cf2','#e8709a'];
+  const projects=[
+    ['pixeldust/vibecoding/claude/dashboard','…/vibecoding/claude-dashboard',3,'12.4M','1 min ago'],
+    ['benepower/benepower/backend','…/pixeldust/benepower/backend',35,'182M','2 days ago'],
+    ['ans/solver/codebase','…/pixeldust/ans/solver/codebase',33,'164M','2 days ago'],
+    ['iias/vms','…/work/pixeldust/iias/vms',17,'78.1M','15 hours ago'],
+    ['mohammed','/Users/mohammed',13,'52.0M','2 hours ago'],
+    ['frappe/solas/bench','…/frappe/solas/bench/apps',11,'44.3M','19 hours ago'],
+    ['learning','…/personal/learning',4,'9.8M','19 hours ago'],
+    ['finance/thewrapbot','…/personal/finance/thewrapbot',3,'7.2M','19 hours ago'],
+    ['benepower','…/work/pixeldust/benepower',2,'5.1M','15 hours ago'],
+  ];
+  const pgrid=document.getElementById('pgrid');
+  projects.forEach((p,i)=>{
+    const c=COLORS[i%COLORS.length];
+    const initials=p[0].split('/').pop().slice(0,2).toUpperCase();
+    pgrid.insertAdjacentHTML('beforeend',`<div class="pcard" style="--c:${c}"><span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${c}"></span>
+      <div class="ptop"><span class="pico" style="background:${c}">${initials}</span><span class="pname">${p[0]}</span></div>
+      <div class="ppath">${p[1]}</div>
+      <div class="prow">
+        <span class="pchip"><b>${p[2]}</b> sessions</span>
+        <span class="pchip"><b>${p[3]}</b> tokens</span>
+        <span class="pago">${p[4]}</span>
+      </div>
+    </div>`);
+  });
+
+  const groups=[
+    ['Today','6 sessions',[
+      ['I am not really happy with the current UI/UX of the app. Please generate 3 UI options…','vibecoding/claude/dashboard','#d97757',168,'36m','opus-4.8','done','1 min ago'],
+      ['Lately my machine has been crashing very often mainly due to memory usage…','mohammed','#7aa2f7',152,'40m','opus-4.8','','2 hours ago'],
+      ['on the session detail page, can we also render the session id and add copy to clipboard…','vibecoding/claude/dashboard','#d97757',50,'11m','opus-4.8','done','2 hours ago'],
+      ['Can you check why is it that some of the charts are coming as blank lately for claude code','vibecoding/claude/dashboard','#6ee7a8',75,'15m','opus-4.8','done','2 hours ago'],
+    ]],
+    ['Yesterday','4 sessions',[
+      ['Can you check why am i getting this issue where the UI is not able to render benefit docs…','benepower','#6ee7a8',207,'42m','opus-4.8','partial','15 hours ago'],
+      ['We have configured a T-5 day alerts for meetings where voting is done by UTI MF (212)…','iias/vms','#7aa2f7',196,'36m','opus-4.7','done','15 hours ago'],
+      ['how to build and run this app locally? both frontend and backend along with creating user','erpnext/finance/agent','#f5c451',33,'11m','opus-4.6','done','17 hours ago'],
+      ['grill-me · Just like how we are creating Plans and Benefits, build a similar flow for…','benepower','#f5c451',413,'1h 58m','opus-4.6','done','19 hours ago'],
+    ]],
+  ];
+  const sg=document.getElementById('sgroups');
+  groups.forEach(g=>{
+    let rows='';
+    g[2].forEach(s=>{
+      const badge=s[6]==='done'?'<span class="badge done">completed</span>':s[6]==='partial'?'<span class="badge partial">partial</span>':'';
+      rows+=`<div class="srow"><span style="position:absolute;left:-14px;top:18px;width:7px;height:7px;border-radius:50%;border:2px solid var(--bg);background:${s[2]}"></span>
+        <div class="smain">
+          <div class="sprompt">${s[0]}</div>
+          <div class="ssub">
+            <span class="chip" style="color:${s[2]};background:${s[2]}1a;border:1px solid ${s[2]}3a">${s[1]}</span>
+            <span class="meta">${s[3]} msgs</span><span class="dot"></span>
+            <span class="meta">${s[4]}</span><span class="dot"></span>
+            <span class="meta">${s[5]}</span>
+          </div>
+        </div>
+        <div class="sright">${badge}<span class="stime">${s[7]}</span></div>
+      </div>`;
+    });
+    sg.insertAdjacentHTML('beforeend',`<div class="daygroup">
+      <div class="dayhead"><span class="dl">${g[0]}</span><span class="dc">${g[1]}</span><span class="dline"></span></div>
+      <div class="tl">${rows}</div>
+    </div>`);
+  });
+
+  function show(which){
+    document.getElementById('projects').classList.toggle('hide',which!=='projects');
+    document.getElementById('sessions').classList.toggle('hide',which!=='sessions');
+    document.getElementById('tabP').classList.toggle('on',which==='projects');
+    document.getElementById('tabS').classList.toggle('on',which==='sessions');
+    document.getElementById('navP').classList.toggle('active',which==='projects');
+    document.getElementById('navS').classList.toggle('active',which==='sessions');
+    document.getElementById('crumb').textContent=which;
+  }
+</script>
+</body>
+</html>

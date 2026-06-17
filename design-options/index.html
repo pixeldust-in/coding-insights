@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — UI Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter Tight',sans-serif;background:#0e0f12;color:#e6e9ee;padding:40px;-webkit-font-smoothing:antialiased}
+  h1{font-size:24px;font-weight:700;letter-spacing:-.5px}
+  .sub{color:#8b929e;font-size:14px;margin:6px 0 32px;font-family:'JetBrains Mono',monospace}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1200px}
+  .card{background:#15181e;border:1px solid #262b33;border-radius:14px;overflow:hidden;transition:.18s}
+  .card:hover{transform:translateY(-4px);border-color:#3a414c}
+  .swatch{height:90px;display:flex;align-items:flex-end;padding:14px}
+  .s1{background:linear-gradient(135deg,#0a0b0d,#15181e)}
+  .s2{background:linear-gradient(135deg,#faf9f6,#efece4)}
+  .s3{background:radial-gradient(circle at 30% 0%,#2a2d52,#0b0d16)}
+  .dot{width:22px;height:22px;border-radius:6px;margin-right:6px}
+  .body{padding:18px 20px 22px}
+  .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:#646a85;letter-spacing:.1em;text-transform:uppercase}
+  .name{font-size:18px;font-weight:700;margin:4px 0 6px}
+  .desc{font-size:13px;color:#9aa0b8;line-height:1.55;margin-bottom:16px}
+  a.btn{display:inline-block;background:#d97757;color:#1a0e08;font-weight:600;font-size:13px;text-decoration:none;padding:9px 16px;border-radius:8px}
+  a.btn:hover{filter:brightness(1.08)}
+  .tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;color:#9aa0b8;border:1px solid #2c323b;border-radius:5px;padding:2px 7px;margin:0 5px 5px 0}
+</style>
+</head>
+<body>
+  <h1>Dashboard — 3 UI Directions</h1>
+  <p class="sub">open each in full screen · compare against the current build</p>
+  <div class="grid">
+    <div class="card">
+      <div class="swatch s1"><span class="dot" style="background:#d97757"></span><span class="dot" style="background:#6ee7a8"></span><span class="dot" style="background:#7aa2f7"></span></div>
+      <div class="body">
+        <div class="num">Option 01</div>
+        <div class="name">Carbon</div>
+        <div class="desc">Dark IDE / terminal aesthetic. Dense, precise, monospace detailing. Maximum "developer tool" credibility.</div>
+        <div><span class="tag">dark</span><span class="tag">JetBrains Mono</span><span class="tag">data-dense</span></div>
+        <div style="margin-top:14px"><a class="btn" href="option-1-carbon.html">View →</a></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="swatch s2"><span class="dot" style="background:#c2410c"></span><span class="dot" style="background:#3f7d4e"></span><span class="dot" style="background:#1c1b19"></span></div>
+      <div class="body">
+        <div class="num">Option 02</div>
+        <div class="name">Paper</div>
+        <div class="desc">Refined editorial light theme. Fraunces serif headings, generous whitespace, ink-on-paper restraint. Polished & calm.</div>
+        <div><span class="tag">light</span><span class="tag">Fraunces serif</span><span class="tag">editorial</span></div>
+        <div style="margin-top:14px"><a class="btn" href="option-2-paper.html">View →</a></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="swatch s3"><span class="dot" style="background:#e0795a"></span><span class="dot" style="background:#7c8cf8"></span><span class="dot" style="background:#52d4e0"></span></div>
+      <div class="body">
+        <div class="num">Option 03</div>
+        <div class="name">Aurora</div>
+        <div class="desc">Modern glass / SaaS aesthetic. Ambient gradient mesh, frosted cards, vibrant multi-color charts. Sleek & premium.</div>
+        <div><span class="tag">dark</span><span class="tag">Sora</span><span class="tag">glassmorphism</span></div>
+        <div style="margin-top:14px"><a class="btn" href="option-3-aurora.html">View →</a></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

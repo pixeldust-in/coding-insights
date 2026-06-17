@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option 3 — Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d16;
+    --panel:rgba(24,27,42,.6);
+    --panel-solid:#161927;
+    --line:rgba(255,255,255,.07);
+    --line-2:rgba(255,255,255,.12);
+    --text:#eef0f7;
+    --text-dim:#9aa0b8;
+    --text-faint:#646a85;
+    --accent:#e0795a;       /* claude */
+    --indigo:#7c8cf8;
+    --cyan:#52d4e0;
+    --green:#5fe3a1;
+    --amber:#f5c451;
+    --pink:#f178b6;
+    --violet:#a78bfa;
+    --sans:'Sora',sans-serif;
+    --mono:'Geist Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;display:flex;min-height:100vh;position:relative;overflow-x:hidden;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(700px 420px at 12% -5%, rgba(124,140,248,.16), transparent 60%),
+      radial-gradient(680px 400px at 88% 8%, rgba(224,121,90,.12), transparent 55%),
+      radial-gradient(600px 500px at 70% 100%, rgba(82,212,224,.08), transparent 60%);}
+  .sidebar,.main{position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{width:240px;flex-shrink:0;padding:20px 16px;display:flex;flex-direction:column;
+    border-right:1px solid var(--line);position:sticky;top:0;height:100vh;
+    background:linear-gradient(180deg,rgba(16,18,30,.6),rgba(11,13,22,.3));backdrop-filter:blur(20px)}
+  .brand{display:flex;align-items:center;gap:11px;padding:6px 8px 22px}
+  .brand .logo{width:32px;height:32px;border-radius:9px;flex-shrink:0;
+    background:conic-gradient(from 200deg, var(--accent), var(--pink), var(--indigo), var(--cyan), var(--accent));
+    display:grid;place-items:center;box-shadow:0 6px 22px -6px rgba(124,140,248,.6)}
+  .brand .logo svg{width:18px;height:18px}
+  .brand .name{font-weight:700;font-size:15px;letter-spacing:-.2px}
+  .brand .name small{display:block;font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:2px;font-weight:400}
+  .navlabel{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:var(--text-faint);padding:16px 10px 8px}
+  .nav a{display:flex;align-items:center;gap:12px;padding:9px 11px;border-radius:9px;color:var(--text-dim);
+    text-decoration:none;font-size:13.5px;font-weight:500;transition:.16s;position:relative}
+  .nav a svg{width:16px;height:16px;opacity:.75}
+  .nav a:hover{background:rgba(255,255,255,.04);color:var(--text)}
+  .nav a.active{color:var(--text);background:linear-gradient(90deg,rgba(124,140,248,.18),rgba(124,140,248,.02));
+    box-shadow:inset 0 0 0 1px rgba(124,140,248,.25)}
+  .nav a.active svg{opacity:1;color:var(--indigo)}
+  .nav a .kbd{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-faint);border:1px solid var(--line-2);border-radius:4px;padding:1px 5px}
+  .sidebar .foot{margin-top:auto;padding:12px 10px 2px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:9px}
+  .sidebar .foot .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+
+  /* ===== Main ===== */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:62px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 30px;
+    position:sticky;top:0;z-index:5;background:rgba(11,13,22,.55);backdrop-filter:blur(16px)}
+  .crumbs{font-size:14px;color:var(--text-dim)}
+  .crumbs b{color:var(--text);font-weight:600}
+  .crumbs .sep{margin:0 8px;color:var(--text-faint)}
+  .search{margin-left:auto;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);
+    border:1px solid var(--line-2);border-radius:10px;padding:8px 12px;width:270px;color:var(--text-faint);font-size:13px}
+  .search .kbd{margin-left:auto;font-family:var(--mono);font-size:10px;border:1px solid var(--line-2);border-radius:4px;padding:1px 6px}
+  .icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.04);
+    display:grid;place-items:center;color:var(--text-dim);cursor:pointer}
+
+  .content{padding:28px 30px 70px;max-width:1320px;width:100%;margin:0 auto}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+  .page-head h1{font-size:26px;font-weight:700;letter-spacing:-.6px;
+    background:linear-gradient(90deg,#fff,#bcc2e0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .page-head p{color:var(--text-dim);font-size:13.5px;margin-top:6px}
+  .seg{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:10px;padding:3px;gap:2px}
+  .seg button{font-size:12.5px;color:var(--text-dim);background:none;border:none;padding:7px 15px;border-radius:8px;cursor:pointer;font-weight:500}
+  .seg button.on{background:linear-gradient(135deg,var(--indigo),#6573e8);color:#fff;font-weight:600;box-shadow:0 4px 14px -4px rgba(124,140,248,.6)}
+
+  .glass{background:var(--panel);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(18px);
+    box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 18px 40px -24px rgba(0,0,0,.7)}
+
+  /* ===== Live ===== */
+  .live{padding:22px 24px;margin-bottom:18px;position:relative;overflow:hidden}
+  .live-head{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+  .live-head h3{font-size:14px;font-weight:600}
+  .live-head .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(95,227,161,.18);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(95,227,161,.18)}50%{box-shadow:0 0 0 7px rgba(95,227,161,.05)}}
+  .live-head .ago{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+  .meters{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+  .meter .mtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+  .meter .mname{font-size:13px;font-weight:600}
+  .meter .mpct{font-family:var(--mono);font-size:14px;font-weight:600}
+  .meter .track{height:7px;border-radius:7px;background:rgba(255,255,255,.07);overflow:hidden}
+  .meter .fill{height:100%;border-radius:7px;position:relative}
+  .meter .fill::after{content:"";position:absolute;right:0;top:0;bottom:0;width:14px;background:rgba(255,255,255,.5);filter:blur(6px)}
+  .meter .msub{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:9px}
+
+  /* ===== Stats ===== */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:18px}
+  .stat{padding:18px 20px;position:relative;overflow:hidden;transition:.18s}
+  .stat:hover{transform:translateY(-3px);border-color:var(--line-2)}
+  .stat::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0}
+  .stat.c1::before{background:linear-gradient(90deg,var(--accent),transparent)}
+  .stat.c2::before{background:linear-gradient(90deg,var(--green),transparent)}
+  .stat.c3::before{background:linear-gradient(90deg,var(--indigo),transparent)}
+  .stat.c4::before{background:linear-gradient(90deg,var(--violet),transparent)}
+  .stat .slabel{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--text-faint)}
+  .stat .sval{font-size:32px;font-weight:700;letter-spacing:-1px;margin:11px 0 4px;line-height:1}
+  .stat .ssub{font-size:12px;color:var(--text-dim)}
+  .stat .ssub .up{color:var(--green);font-family:var(--mono);font-size:11px}
+  .stat .spark{position:absolute;right:14px;bottom:14px;width:78px;height:34px;opacity:.75}
+
+  /* ===== Charts ===== */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .chart{padding:20px 22px}
+  .chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .chart-head h3{font-size:15px;font-weight:600}
+  .leg{display:flex;gap:14px}
+  .leg span{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .leg i{width:9px;height:9px;border-radius:3px}
+  .axis{font-family:var(--mono);font-size:10px;fill:var(--text-faint)}
+  .chart-foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:9px}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="name">Claude Code<small>insights</small></div>
+    </div>
+    <nav class="nav">
+      <a class="active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>Projects</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Sessions</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3 3"/></svg>History</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v4H4zM4 12h16v8H4z"/></svg>Plans</a>
+      <div class="navlabel">Catalog</div>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.5 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>Skills</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h6m-6 0v6m12-6h-6m6 0v4m0 2v6a2 2 0 0 1-2 2h-4m6-8h-6"/></svg>Commands<span class="kbd">⌘K</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Help</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8a2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0a1.6 1.6 0 0 0-2.4-1.4 1.6 1.6 0 0 0-1.8.3 2 2 0 1 1-2.8-2.8 1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.6-2.6"/></svg>Settings</a>
+    </nav>
+    <div class="foot"><span class="dot"></span>~/.claude · synced</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="crumbs"><b>Dashboard</b><span class="sep">/</span>Overview</div>
+      <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>Search everything…<span class="kbd">⌘K</span></div>
+      <div class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div><h1>Dashboard</h1><p>117 sessions tracked since 25 March 2026</p></div>
+        <div class="seg"><button>Daily</button><button class="on">Weekly</button><button>Monthly</button></div>
+      </div>
+
+      <section class="glass live">
+        <div class="live-head"><span class="live-dot"></span><h3>Live Usage</h3><span class="ago">updated 12s ago</span></div>
+        <div class="meters">
+          <div class="meter"><div class="mtop"><span class="mname">5-Hour Window</span><span class="mpct" style="color:var(--green)">2%</span></div><div class="track"><div class="fill" style="width:6%;background:linear-gradient(90deg,var(--green),#3fd) "></div></div><div class="msub">resets in ~4h 12m</div></div>
+          <div class="meter"><div class="mtop"><span class="mname">7-Day Limit</span><span class="mpct" style="color:var(--amber)">35%</span></div><div class="track"><div class="fill" style="width:35%;background:linear-gradient(90deg,var(--cyan),var(--indigo))"></div></div><div class="msub">resets in 1d 06h</div></div>
+          <div class="meter"><div class="mtop"><span class="mname">7-Day · Sonnet</span><span class="mpct" style="color:var(--amber)">29%</span></div><div class="track"><div class="fill" style="width:29%;background:linear-gradient(90deg,var(--indigo),var(--violet))"></div></div><div class="msub">resets in 1d 06h</div></div>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="glass stat c1"><div class="slabel">Total Sessions</div><div class="sval">117</div><div class="ssub"><span class="up">▲ 8</span> this week</div><svg class="spark" viewBox="0 0 80 36" preserveAspectRatio="none"><polyline fill="none" stroke="var(--accent)" stroke-width="1.6" points="0,28 14,26 28,20 42,22 56,12 70,14 80,6"/></svg></div>
+        <div class="glass stat c2"><div class="slabel">Total Messages</div><div class="sval">9.6K</div><div class="ssub"><span class="up">▲ 12%</span> vs last week</div><svg class="spark" viewBox="0 0 80 36" preserveAspectRatio="none"><polyline fill="none" stroke="var(--green)" stroke-width="1.6" points="0,26 14,24 28,26 42,16 56,18 70,8 80,10"/></svg></div>
+        <div class="glass stat c3"><div class="slabel">Total Tokens</div><div class="sval">1.9B</div><div class="ssub">across all models</div><svg class="spark" viewBox="0 0 80 36" preserveAspectRatio="none"><polyline fill="none" stroke="var(--indigo)" stroke-width="1.6" points="0,30 14,28 28,24 42,26 56,14 70,6 80,12"/></svg></div>
+        <div class="glass stat c4"><div class="slabel">Active Days</div><div class="sval">36</div><div class="ssub">of 84 tracked</div><svg class="spark" viewBox="0 0 80 36" preserveAspectRatio="none"><polyline fill="none" stroke="var(--violet)" stroke-width="1.6" points="0,22 14,24 28,18 42,20 56,16 70,18 80,12"/></svg></div>
+      </section>
+
+      <section class="grid2">
+        <div class="glass chart">
+          <div class="chart-head"><h3>Weekly Activity</h3><div class="leg"><span><i style="background:var(--accent)"></i>Messages</span><span><i style="background:var(--green)"></i>Tool Calls</span></div></div>
+          <svg viewBox="0 0 520 220" width="100%" height="220">
+            <defs>
+              <linearGradient id="a1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".4"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient>
+              <linearGradient id="a2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".3"/><stop offset="1" stop-color="var(--green)" stop-opacity="0"/></linearGradient>
+            </defs>
+            <g stroke="var(--line)" stroke-width="1"><line x1="40" y1="20" x2="510" y2="20"/><line x1="40" y1="70" x2="510" y2="70"/><line x1="40" y1="120" x2="510" y2="120"/><line x1="40" y1="170" x2="510" y2="170"/></g>
+            <text class="axis" x="8" y="24">3k</text><text class="axis" x="8" y="74">2k</text><text class="axis" x="8" y="124">1k</text><text class="axis" x="14" y="174">0</text>
+            <path d="M40,160 C90,150 110,120 150,140 C190,160 210,90 250,110 C290,130 310,60 350,40 C390,20 420,80 460,90 L510,150 L510,180 L40,180 Z" fill="url(#a1)"/>
+            <path d="M40,160 C90,150 110,120 150,140 C190,160 210,90 250,110 C290,130 310,60 350,40 C390,20 420,80 460,90 L510,150" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+            <path d="M40,172 C90,168 110,160 150,166 C190,170 210,150 250,156 C290,162 310,140 350,150 C390,158 420,150 460,158 L510,168 L510,180 L40,180 Z" fill="url(#a2)"/>
+            <path d="M40,172 C90,168 110,160 150,166 C190,170 210,150 250,156 C290,162 310,140 350,150 C390,158 420,150 460,158 L510,168" fill="none" stroke="var(--green)" stroke-width="2.4"/>
+          </svg>
+          <div class="chart-foot"><span>Apr 27</span><span>May 11</span><span>May 25</span><span>Jun 8</span><span>Jun 21</span></div>
+        </div>
+        <div class="glass chart">
+          <div class="chart-head"><h3>Token Usage by Model</h3><div class="leg"><span><i style="background:var(--accent)"></i>opus-4.6</span><span><i style="background:var(--indigo)"></i>opus-4.8</span><span><i style="background:var(--violet)"></i>fable-5</span></div></div>
+          <svg viewBox="0 0 520 220" width="100%" height="220">
+            <g stroke="var(--line)" stroke-width="1"><line x1="40" y1="20" x2="510" y2="20"/><line x1="40" y1="70" x2="510" y2="70"/><line x1="40" y1="120" x2="510" y2="120"/><line x1="40" y1="170" x2="510" y2="170"/></g>
+            <text class="axis" x="2" y="24">3M</text><text class="axis" x="2" y="124">1.5M</text><text class="axis" x="14" y="174">0</text>
+            <path d="M40,175 C120,172 180,150 250,120 C300,100 340,60 380,40 C410,28 440,90 460,110 L510,150" fill="none" stroke="var(--indigo)" stroke-width="2.6"/>
+            <path d="M40,178 C150,176 200,150 280,120 C340,98 380,50 420,40 C450,33 480,90 500,120 L510,130" fill="none" stroke="var(--violet)" stroke-width="2.6"/>
+            <path d="M40,176 C100,170 160,120 220,130 C280,140 320,165 360,170 C420,175 470,176 510,176" fill="none" stroke="var(--accent)" stroke-width="2.6"/>
+          </svg>
+          <div class="chart-foot"><span>Apr 27</span><span>May 11</span><span>May 25</span><span>Jun 8</span><span>Jun 21</span></div>
+        </div>
+      </section>
+
+      <section class="grid2">
+        <div class="glass chart">
+          <div class="chart-head"><h3>Activity by Project</h3></div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px">
+            <div style="display:flex;align-items:center;gap:13px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ans/solver/codebase</span><div style="flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.07)"><div style="width:88%;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--pink))"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:34px;text-align:right">33</span></div>
+            <div style="display:flex;align-items:center;gap:13px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">benepower/backend</span><div style="flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.07)"><div style="width:95%;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:34px;text-align:right">35</span></div>
+            <div style="display:flex;align-items:center;gap:13px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">iias/vms</span><div style="flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.07)"><div style="width:46%;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--indigo),var(--violet))"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:34px;text-align:right">17</span></div>
+            <div style="display:flex;align-items:center;gap:13px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">frappe/solas/bench</span><div style="flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.07)"><div style="width:30%;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--indigo))"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:34px;text-align:right">11</span></div>
+            <div style="display:flex;align-items:center;gap:13px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">learning</span><div style="flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.07)"><div style="width:12%;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--amber),var(--accent))"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:34px;text-align:right">4</span></div>
+          </div>
+        </div>
+        <div class="glass chart">
+          <div class="chart-head"><h3>Activity Heatmap</h3><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">by hour · last 5 days</span></div>
+          <div style="display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:16px" id="heat"></div>
+          <div class="chart-foot"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+<script>
+  const heat=document.getElementById('heat');
+  const cols=['124,140,248','82,212,224','95,227,161'];
+  for(let i=0;i<24*5;i++){const v=Math.random();const c=cols[i%3];const d=document.createElement('div');
+    d.style.cssText=`aspect-ratio:1;border-radius:3px;background:rgba(${c},${0.08+v*0.8})`;heat.appendChild(d);}
+</script>
+</body>
+</html>

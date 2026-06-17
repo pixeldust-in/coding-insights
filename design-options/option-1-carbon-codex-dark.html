@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carbon — Codex (Dark)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c0b;
+    --bg-2:#0d100e;
+    --panel:#0f1311;
+    --panel-2:#141a17;
+    --line:#1c2320;
+    --line-2:#26302b;
+    --text:#e7ece9;
+    --text-dim:#8c968f;
+    --text-faint:#586059;
+    --accent:#10a37f;       /* openai green */
+    --accent-2:#1fc99c;
+    --green:#5fe3a1;
+    --amber:#f5c451;
+    --teal:#2dd4bf;
+    --blue:#5aa9e6;
+    --violet:#a78bfa;
+    --radius:10px;
+    --mono:'JetBrains Mono',monospace;
+    --sans:'Inter Tight',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(16,163,127,.07), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    min-height:100vh;
+  }
+  /* ===== Sidebar ===== */
+  .sidebar{
+    width:236px;flex-shrink:0;
+    border-right:1px solid var(--line);
+    background:linear-gradient(180deg, #0c0f0d, #0a0c0b);
+    display:flex;flex-direction:column;
+    padding:18px 14px;
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:11px;padding:6px 8px 20px}
+  .brand .logo{
+    width:30px;height:30px;border-radius:8px;flex-shrink:0;
+    background:radial-gradient(circle at 30% 30%, var(--accent-2), var(--accent));
+    display:grid;place-items:center;
+    box-shadow:0 0 0 1px rgba(16,163,127,.3), 0 6px 18px -6px rgba(16,163,127,.5);
+  }
+  .brand .logo svg{width:18px;height:18px}
+  .brand .name{font-weight:700;font-size:15px;letter-spacing:-.2px}
+  .brand .name span{color:var(--text-faint);font-weight:500;font-size:11px;display:block;font-family:var(--mono);letter-spacing:0}
+  .navlabel{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-faint);padding:14px 10px 8px}
+  .nav a{
+    display:flex;align-items:center;gap:11px;
+    padding:8px 10px;border-radius:8px;
+    color:var(--text-dim);text-decoration:none;font-size:13.5px;font-weight:500;
+    position:relative;transition:.14s;
+  }
+  .nav a svg{width:16px;height:16px;opacity:.8}
+  .nav a:hover{background:var(--panel);color:var(--text)}
+  .nav a.active{background:var(--panel-2);color:var(--text)}
+  .nav a.active::before{
+    content:"";position:absolute;left:-14px;top:50%;transform:translateY(-50%);
+    width:3px;height:18px;border-radius:0 3px 3px 0;background:var(--accent);
+  }
+  .nav a.active svg{opacity:1;color:var(--accent)}
+  .nav a .kbd{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-faint);
+    border:1px solid var(--line-2);border-radius:4px;padding:1px 5px}
+  .sidebar .foot{margin-top:auto;padding:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .sidebar .foot .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .sidebar .foot small{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+
+  /* ===== Main ===== */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{
+    height:60px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:16px;padding:0 28px;
+    position:sticky;top:0;z-index:5;
+    background:rgba(10,12,11,.7);backdrop-filter:blur(12px);
+  }
+  .crumbs{font-family:var(--mono);font-size:13px;color:var(--text-dim)}
+  .crumbs b{color:var(--text);font-weight:600}
+  .crumbs .sep{color:var(--text-faint);margin:0 7px}
+  .topbar .search{
+    margin-left:auto;display:flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--line-2);border-radius:8px;
+    padding:7px 11px;width:260px;color:var(--text-faint);font-size:13px;font-family:var(--mono);
+  }
+  .topbar .search .kbd{margin-left:auto;border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;font-size:10px}
+  .icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);
+    display:grid;place-items:center;color:var(--text-dim);cursor:pointer}
+  .icon-btn:hover{color:var(--text)}
+
+  .content{padding:26px 28px 60px;max-width:1320px;width:100%;margin:0 auto}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+  .page-head h1{font-size:23px;font-weight:700;letter-spacing:-.5px}
+  .page-head p{color:var(--text-dim);font-size:13px;margin-top:4px;font-family:var(--mono)}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:3px;gap:2px}
+  .seg button{font-family:var(--mono);font-size:12px;color:var(--text-dim);background:none;border:none;
+    padding:6px 13px;border-radius:6px;cursor:pointer;font-weight:500}
+  .seg button.on{background:var(--accent);color:#04140f;font-weight:600}
+
+  /* ===== Live usage panel ===== */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+  .live{padding:18px 22px;margin-bottom:18px;
+    background:linear-gradient(180deg,var(--panel),#0c100e);position:relative;overflow:hidden}
+  .live::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(500px 200px at 90% 0%, rgba(16,163,127,.08), transparent)}
+  .live-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .live-head h3{font-size:13px;font-weight:600;letter-spacing:.02em}
+  .live-head .live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .live-head .ago{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+  .meters{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .meter .mtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+  .meter .mname{font-size:12.5px;font-weight:600;color:var(--text)}
+  .meter .mpct{font-family:var(--mono);font-size:13px;font-weight:600}
+  .meter .track{height:6px;border-radius:6px;background:var(--line-2);overflow:hidden}
+  .meter .fill{height:100%;border-radius:6px}
+  .meter .msub{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:8px}
+
+  /* ===== Stat cards ===== */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .stat{padding:16px 18px;position:relative;overflow:hidden;transition:.16s}
+  .stat:hover{border-color:var(--line-2);transform:translateY(-2px)}
+  .stat .slabel{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-faint);display:flex;align-items:center;justify-content:space-between}
+  .stat .slabel svg{width:14px;height:14px;opacity:.5}
+  .stat .sval{font-size:30px;font-weight:700;letter-spacing:-1px;margin:10px 0 3px;font-family:var(--sans)}
+  .stat .ssub{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .stat .ssub .up{color:var(--green)}
+  .stat .spark{position:absolute;right:0;bottom:0;width:90px;height:40px;opacity:.5}
+
+  /* ===== Charts ===== */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .chart{padding:18px 20px}
+  .chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .chart-head h3{font-size:14px;font-weight:600}
+  .chart-head .leg{display:flex;gap:14px}
+  .leg span{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .leg i{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .chart .axis{font-family:var(--mono);font-size:10px;fill:var(--text-faint)}
+  .chart-foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:8px}
+</style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 8l-3 4 3 4M19 8l3 4-3 4M14 5l-4 14" stroke="#04140f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="name">Codex<span>cli insights · v1.4</span></div>
+    </div>
+    <nav class="nav">
+      <a class="active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>Projects</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Sessions</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3 3"/></svg>History</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v4H4zM4 12h16v8H4z"/></svg>Plans</a>
+      <div class="navlabel">Catalog</div>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.5 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>Skills</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h6m-6 0v6m12-6h-6m6 0v4m0 2v6a2 2 0 0 1-2 2h-4m6-8h-6"/></svg>Commands<span class="kbd">⌘K</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Help</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7"/></svg>Settings</a>
+    </nav>
+    <div class="foot">
+      <span class="dot"></span>
+      <small>~/.codex · synced</small>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="crumbs"><b>codex</b><span class="sep">/</span>dashboard</div>
+      <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>Search everything…<span class="kbd">⌘K</span></div>
+      <div class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p>84 sessions · since 2026-04-02</p>
+        </div>
+        <div class="seg">
+          <button>Daily</button><button class="on">Weekly</button><button>Monthly</button>
+        </div>
+      </div>
+
+      <!-- Live -->
+      <section class="panel live">
+        <div class="live-head">
+          <span class="live-dot"></span>
+          <h3>Live Usage</h3>
+          <span class="ago">updated 12s ago</span>
+        </div>
+        <div class="meters">
+          <div class="meter">
+            <div class="mtop"><span class="mname">5-Hour Window</span><span class="mpct" style="color:var(--green)">4%</span></div>
+            <div class="track"><div class="fill" style="width:4%;background:var(--accent)"></div></div>
+            <div class="msub">resets in ~3h 48m</div>
+          </div>
+          <div class="meter">
+            <div class="mtop"><span class="mname">Weekly Limit</span><span class="mpct" style="color:var(--amber)">41%</span></div>
+            <div class="track"><div class="fill" style="width:41%;background:linear-gradient(90deg,var(--accent),var(--amber))"></div></div>
+            <div class="msub">resets in 2d 09h</div>
+          </div>
+          <div class="meter">
+            <div class="mtop"><span class="mname">Weekly · gpt-5-codex</span><span class="mpct" style="color:var(--amber)">33%</span></div>
+            <div class="track"><div class="fill" style="width:33%;background:linear-gradient(90deg,var(--accent),var(--amber))"></div></div>
+            <div class="msub">resets in 2d 09h</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="stats">
+        <div class="panel stat">
+          <div class="slabel">Total Sessions <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="sval">84</div>
+          <div class="ssub"><span class="up">▲ 6</span> this week</div>
+          <svg class="spark" viewBox="0 0 90 40" preserveAspectRatio="none"><polyline fill="none" stroke="var(--accent)" stroke-width="1.5" points="0,32 15,30 30,24 45,26 60,16 75,18 90,8"/></svg>
+        </div>
+        <div class="panel stat">
+          <div class="slabel">Total Messages <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H5.2L4 18z"/></svg></div>
+          <div class="sval">6.2K</div>
+          <div class="ssub"><span class="up">▲ 9%</span> vs last week</div>
+          <svg class="spark" viewBox="0 0 90 40" preserveAspectRatio="none"><polyline fill="none" stroke="var(--teal)" stroke-width="1.5" points="0,30 15,28 30,30 45,20 60,22 75,10 90,12"/></svg>
+        </div>
+        <div class="panel stat">
+          <div class="slabel">Total Tokens <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="sval">1.3B</div>
+          <div class="ssub">across all models</div>
+          <svg class="spark" viewBox="0 0 90 40" preserveAspectRatio="none"><polyline fill="none" stroke="var(--blue)" stroke-width="1.5" points="0,34 15,32 30,28 45,30 60,18 75,8 90,14"/></svg>
+        </div>
+        <div class="panel stat">
+          <div class="slabel">Active Days <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div>
+          <div class="sval">28</div>
+          <div class="ssub">of 76 tracked</div>
+          <svg class="spark" viewBox="0 0 90 40" preserveAspectRatio="none"><polyline fill="none" stroke="var(--violet)" stroke-width="1.5" points="0,26 15,28 30,22 45,24 60,20 75,22 90,16"/></svg>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="grid2">
+        <div class="panel chart">
+          <div class="chart-head">
+            <h3>Weekly Activity</h3>
+            <div class="leg"><span><i style="background:var(--accent)"></i>Messages</span><span><i style="background:var(--teal)"></i>Tool Calls</span></div>
+          </div>
+          <svg viewBox="0 0 520 220" width="100%" height="220">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient>
+              <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--teal)" stop-opacity=".25"/><stop offset="1" stop-color="var(--teal)" stop-opacity="0"/></linearGradient>
+            </defs>
+            <g stroke="var(--line)" stroke-width="1">
+              <line x1="40" y1="20" x2="510" y2="20"/><line x1="40" y1="70" x2="510" y2="70"/><line x1="40" y1="120" x2="510" y2="120"/><line x1="40" y1="170" x2="510" y2="170"/>
+            </g>
+            <text class="axis" x="8" y="24">3k</text><text class="axis" x="8" y="74">2k</text><text class="axis" x="8" y="124">1k</text><text class="axis" x="14" y="174">0</text>
+            <path d="M40,160 C90,150 110,120 150,140 C190,160 210,90 250,110 C290,130 310,60 350,40 C390,20 420,80 460,90 L510,150 L510,180 L40,180 Z" fill="url(#g1)"/>
+            <path d="M40,160 C90,150 110,120 150,140 C190,160 210,90 250,110 C290,130 310,60 350,40 C390,20 420,80 460,90 L510,150" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+            <path d="M40,172 C90,168 110,160 150,166 C190,170 210,150 250,156 C290,162 310,140 350,150 C390,158 420,150 460,158 L510,168 L510,180 L40,180 Z" fill="url(#g2)"/>
+            <path d="M40,172 C90,168 110,160 150,166 C190,170 210,150 250,156 C290,162 310,140 350,150 C390,158 420,150 460,158 L510,168" fill="none" stroke="var(--teal)" stroke-width="2.2"/>
+          </svg>
+          <div class="chart-foot"><span>Apr 27</span><span>May 11</span><span>May 25</span><span>Jun 8</span><span>Jun 21</span></div>
+        </div>
+
+        <div class="panel chart">
+          <div class="chart-head">
+            <h3>Token Usage by Model</h3>
+            <div class="leg"><span><i style="background:var(--accent)"></i>gpt-5</span><span><i style="background:var(--blue)"></i>gpt-5-codex</span><span><i style="background:var(--violet)"></i>o4-mini</span></div>
+          </div>
+          <svg viewBox="0 0 520 220" width="100%" height="220">
+            <g stroke="var(--line)" stroke-width="1">
+              <line x1="40" y1="20" x2="510" y2="20"/><line x1="40" y1="70" x2="510" y2="70"/><line x1="40" y1="120" x2="510" y2="120"/><line x1="40" y1="170" x2="510" y2="170"/>
+            </g>
+            <text class="axis" x="2" y="24">3M</text><text class="axis" x="2" y="124">1.5M</text><text class="axis" x="14" y="174">0</text>
+            <path d="M40,175 C120,172 180,150 250,120 C300,100 340,60 380,40 C410,28 440,90 460,110 L510,150" fill="none" stroke="var(--blue)" stroke-width="2.2"/>
+            <path d="M40,178 C150,176 200,150 280,120 C340,98 380,50 420,40 C450,33 480,90 500,120 L510,130" fill="none" stroke="var(--violet)" stroke-width="2.2"/>
+            <path d="M40,176 C100,170 160,120 220,130 C280,140 320,165 360,170 C420,175 470,176 510,176" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+          </svg>
+          <div class="chart-foot"><span>Apr 27</span><span>May 11</span><span>May 25</span><span>Jun 8</span><span>Jun 21</span></div>
+        </div>
+      </section>
+
+      <section class="grid2">
+        <div class="panel chart">
+          <div class="chart-head"><h3>Activity by Project</h3></div>
+          <div style="display:flex;flex-direction:column;gap:13px;margin-top:14px">
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ans/solver/codebase</span><div style="flex:1;height:8px;border-radius:6px;background:var(--line-2)"><div style="width:88%;height:100%;border-radius:6px;background:var(--accent)"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:36px;text-align:right">24</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">benepower/backend</span><div style="flex:1;height:8px;border-radius:6px;background:var(--line-2)"><div style="width:95%;height:100%;border-radius:6px;background:var(--teal)"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:36px;text-align:right">26</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">iias/vms</span><div style="flex:1;height:8px;border-radius:6px;background:var(--line-2)"><div style="width:46%;height:100%;border-radius:6px;background:var(--blue)"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:36px;text-align:right">12</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">frappe/solas/bench</span><div style="flex:1;height:8px;border-radius:6px;background:var(--line-2)"><div style="width:30%;height:100%;border-radius:6px;background:var(--violet)"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:36px;text-align:right">8</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:11.5px;color:var(--text-dim);width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">learning</span><div style="flex:1;height:8px;border-radius:6px;background:var(--line-2)"><div style="width:12%;height:100%;border-radius:6px;background:var(--amber)"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);width:36px;text-align:right">3</span></div>
+          </div>
+        </div>
+        <div class="panel chart">
+          <div class="chart-head"><h3>Activity Heatmap · by hour</h3></div>
+          <div style="display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:16px" id="heat"></div>
+          <div class="chart-foot"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+<script>
+  const heat=document.getElementById('heat');
+  for(let i=0;i<24*5;i++){const v=Math.random();const d=document.createElement('div');
+    d.style.cssText=`aspect-ratio:1;border-radius:3px;background:rgba(16,163,127,${0.08+v*0.85})`;heat.appendChild(d);}
+</script>
+</body>
+</html>
