@@ -75,6 +75,7 @@
 				<SessionRow
 					href="/claude/sessions/{session.sessionId}"
 					prompt={session.firstPrompt}
+					sessionName={session.sessionName ?? ''}
 					projectName={session.projectName ?? ''}
 					messageCount={session.messageCount}
 					durationMinutes={session.durationMinutes}

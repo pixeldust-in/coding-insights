@@ -5,6 +5,7 @@
 	let {
 		href,
 		prompt,
+		sessionName = '',
 		projectName = '',
 		messageCount = undefined,
 		durationMinutes = undefined,
@@ -14,6 +15,7 @@
 	}: {
 		href: string;
 		prompt: string;
+		sessionName?: string;
 		projectName?: string;
 		messageCount?: number;
 		durationMinutes?: number;
@@ -32,9 +34,23 @@
 	<span class="w-[3px] self-stretch rounded-full shrink-0" style="background: {color};"></span>
 
 	<div class="min-w-0 flex-1">
-		<div class="text-[13.5px] font-medium truncate group-hover:text-accent transition-colors">
-			{prompt || 'No prompt'}
-		</div>
+		{#if sessionName}
+			<div class="flex items-center gap-2 min-w-0">
+				<span
+					class="shrink-0 font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-accent/10 text-accent truncate max-w-[55%]"
+					title={sessionName}
+				>
+					{sessionName}
+				</span>
+				<span class="text-[12.5px] text-text-secondary truncate group-hover:text-accent transition-colors">
+					{prompt || 'No prompt'}
+				</span>
+			</div>
+		{:else}
+			<div class="text-[13.5px] font-medium truncate group-hover:text-accent transition-colors">
+				{prompt || 'No prompt'}
+			</div>
+		{/if}
 		<div class="flex items-center gap-3 mt-2 flex-wrap">
 			{#if projectName}
 				<span

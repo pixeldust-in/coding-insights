@@ -168,6 +168,7 @@ export function listProjectSessions(dirName: string): SessionListItem[] {
 
 interface ParsedJsonlInfo {
 	firstPrompt: string;
+	sessionName: string;
 	userCount: number;
 	assistantCount: number;
 	inputTokens: number;
@@ -175,10 +176,36 @@ interface ParsedJsonlInfo {
 	durationMinutes: number;
 }
 
+/** Extract a user-assigned session name from the "named this session" reminder text */
+function extractSessionName(text: string | undefined): string {
+	const m = text?.match(/named this session "([^"]+)"/);
+	return m ? m[1].trim() : '';
+}
+
+/**
+ * Turn raw user-message text into a clean prompt preview.
+ * Surfaces slash-command arguments, and drops system reminders / meta wrappers
+ * that would otherwise show up as noisy `<system-reminder>…` / `<command-message>…` rows.
+ */
+function cleanPromptPreview(text: string | undefined): string {
+	const t = (text ?? '').trim();
+	if (!t) return '';
+	if (t.startsWith('<command-message>') || t.startsWith('<command-name>')) {
+		const args = t.match(/<command-args>([\s\S]*?)<\/command-args>/);
+		if (args && args[1].trim()) return args[1].trim();
+		const name = t.match(/<command-name>([\s\S]*?)<\/command-name>/);
+		if (name && name[1].trim()) return name[1].trim();
+		return '';
+	}
+	if (t.startsWith('<system-reminder') || t.startsWith('<local-command')) return '';
+	return t;
+}
+
 function parseJsonlInfo(filePath: string): ParsedJsonlInfo {
 	try {
 		const content = readFileSync(filePath, 'utf-8');
 		let firstPrompt = '';
+		let sessionName = '';
 		let userCount = 0;
 		let assistantCount = 0;
 		let inputTokens = 0;
@@ -206,15 +233,20 @@ function parseJsonlInfo(filePath: string): ParsedJsonlInfo {
 							.map((b: { text: string }) => b.text)
 							.join(' ');
 					}
-					// Skip command/system messages
+					text = text.trim();
+					if (!text) continue;
+
+					// Capture the user-assigned session name (lives in an isMeta reminder)
+					if (!sessionName) sessionName = extractSessionName(text);
+
+					// Skip command/system messages when counting + previewing
 					if (
-						text.trim() &&
-						!text.trim().startsWith('<command-name>') &&
-						!text.trim().startsWith('<local-command')
+						!text.startsWith('<command-name>') &&
+						!text.startsWith('<local-command')
 					) {
 						userCount++;
 						if (!firstPrompt) {
-							firstPrompt = text.trim().slice(0, 200);
+							firstPrompt = cleanPromptPreview(text).slice(0, 200);
 						}
 					}
 				} else if (obj.type === 'assistant') {
@@ -234,9 +266,9 @@ function parseJsonlInfo(filePath: string): ParsedJsonlInfo {
 
 		const durationMinutes = computeActiveDuration(timestamps);
 
-		return { firstPrompt, userCount, assistantCount, inputTokens, outputTokens, durationMinutes };
+		return { firstPrompt, sessionName, userCount, assistantCount, inputTokens, outputTokens, durationMinutes };
 	} catch {
-		return { firstPrompt: '', userCount: 0, assistantCount: 0, inputTokens: 0, outputTokens: 0, durationMinutes: 0 };
+		return { firstPrompt: '', sessionName: '', userCount: 0, assistantCount: 0, inputTokens: 0, outputTokens: 0, durationMinutes: 0 };
 	}
 }
 
@@ -290,9 +322,13 @@ function mergeSessionData(
 	meta?: SessionMeta,
 	parsed?: ParsedJsonlInfo
 ): SessionListItem {
+	const rawFirst = base.firstPrompt || meta?.first_prompt || parsed?.firstPrompt || '';
+	const firstPrompt = cleanPromptPreview(rawFirst) || parsed?.firstPrompt || '';
+	const sessionName = parsed?.sessionName || extractSessionName(rawFirst);
 	return {
 		sessionId,
-		firstPrompt: base.firstPrompt || meta?.first_prompt || '',
+		firstPrompt,
+		sessionName: sessionName || undefined,
 		summary: base.summary || meta?.summary || '',
 		messageCount: base.messageCount || (meta ? meta.user_message_count + meta.assistant_message_count : 0),
 		created: base.created || meta?.start_time || '',

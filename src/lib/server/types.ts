@@ -130,6 +130,8 @@ export interface Project {
 export interface SessionListItem {
 	sessionId: string;
 	firstPrompt: string;
+	/** User-assigned session name (from the "named this session" reminder), if any */
+	sessionName?: string;
 	summary: string;
 	messageCount: number;
 	created: string;
@@ -319,5 +321,7 @@ export interface HistoryEntry {
 	timestamp: number;
 	project: string;
 	sessionId: string;
+	/** User-assigned session name for this entry's session, if any */
+	sessionName?: string;
 	pastedContents?: Record<string, unknown>;
 }

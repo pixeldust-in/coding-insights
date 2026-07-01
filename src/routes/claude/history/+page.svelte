@@ -85,6 +85,7 @@
 					<SessionRow
 						href="/claude/sessions/{entry.sessionId}"
 						prompt={entry.display}
+						sessionName={entry.sessionName ?? ''}
 						projectName={projectName(entry.project)}
 						time={new Date(entry.timestamp).toISOString()}
 					/>

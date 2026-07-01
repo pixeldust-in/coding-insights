@@ -80,9 +80,23 @@
 			>
 				<div class="flex items-start justify-between gap-4">
 					<div class="min-w-0 flex-1">
-						<p class="text-sm font-medium truncate group-hover:text-accent transition-colors">
-							{session.firstPrompt || 'No prompt'}
-						</p>
+						{#if session.sessionName}
+							<div class="flex items-center gap-2 min-w-0">
+								<span
+									class="shrink-0 font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-accent/10 text-accent truncate max-w-[60%]"
+									title={session.sessionName}
+								>
+									{session.sessionName}
+								</span>
+								<span class="text-[13px] text-text-secondary truncate group-hover:text-accent transition-colors">
+									{session.firstPrompt || 'No prompt'}
+								</span>
+							</div>
+						{:else}
+							<p class="text-sm font-medium truncate group-hover:text-accent transition-colors">
+								{session.firstPrompt || 'No prompt'}
+							</p>
+						{/if}
 						{#if session.summary}
 							<p class="text-xs text-text-muted mt-1 truncate">{session.summary}</p>
 						{/if}
