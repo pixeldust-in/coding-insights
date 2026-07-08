@@ -201,7 +201,39 @@ function cleanPromptPreview(text: string | undefined): string {
 	return t;
 }
 
+const EMPTY_JSONL_INFO: ParsedJsonlInfo = {
+	firstPrompt: '',
+	sessionName: '',
+	userCount: 0,
+	assistantCount: 0,
+	inputTokens: 0,
+	outputTokens: 0,
+	durationMinutes: 0
+};
+
+// Full-transcript parsing is expensive (hundreds of MB across all sessions), and
+// listing pages call this for every session on every request. Cache per file,
+// invalidated by mtime+size, so only transcripts that changed get re-parsed.
+const jsonlInfoCache = new Map<string, { mtimeMs: number; size: number; info: ParsedJsonlInfo }>();
+
 function parseJsonlInfo(filePath: string): ParsedJsonlInfo {
+	let mtimeMs: number;
+	let size: number;
+	try {
+		({ mtimeMs, size } = statSync(filePath));
+	} catch {
+		return EMPTY_JSONL_INFO;
+	}
+
+	const cached = jsonlInfoCache.get(filePath);
+	if (cached && cached.mtimeMs === mtimeMs && cached.size === size) return cached.info;
+
+	const info = parseJsonlInfoUncached(filePath);
+	jsonlInfoCache.set(filePath, { mtimeMs, size, info });
+	return info;
+}
+
+function parseJsonlInfoUncached(filePath: string): ParsedJsonlInfo {
 	try {
 		const content = readFileSync(filePath, 'utf-8');
 		let firstPrompt = '';
@@ -268,7 +300,7 @@ function parseJsonlInfo(filePath: string): ParsedJsonlInfo {
 
 		return { firstPrompt, sessionName, userCount, assistantCount, inputTokens, outputTokens, durationMinutes };
 	} catch {
-		return { firstPrompt: '', sessionName: '', userCount: 0, assistantCount: 0, inputTokens: 0, outputTokens: 0, durationMinutes: 0 };
+		return EMPTY_JSONL_INFO;
 	}
 }
 
