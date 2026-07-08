@@ -5,7 +5,7 @@ import { getSessionMeta } from '$lib/server/readers/session-meta.js';
 import { getProjectDisplayName } from '$lib/server/readers/projects.js';
 import { sessionToMarkdown } from '$lib/server/exporters/session-markdown.js';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, url }) => {
 	const { project: projectDir, session: sessionId } = params;
 
 	const { messages } = await loadFullSession(projectDir, sessionId);
@@ -15,7 +15,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		sessionId,
 		projectName: getProjectDisplayName(projectDir),
 		messages,
-		meta: getSessionMeta(sessionId)
+		meta: getSessionMeta(sessionId),
+		hideTools: url.searchParams.get('hideTools') === '1'
 	});
 
 	return new Response(markdown, {

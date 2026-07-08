@@ -7,6 +7,8 @@ export interface SessionMarkdownInput {
 	projectName: string;
 	messages: ConversationMessage[];
 	meta?: SessionMeta;
+	/** Omit tool calls, keeping only conversational content. */
+	hideTools?: boolean;
 }
 
 function formatTimestamp(ts: string): string {
@@ -109,8 +111,9 @@ function assistantBlockToMarkdown(block: ContentBlock): string {
 	}
 }
 
-function assistantMessageToMarkdown(msg: ConversationMessage): string {
+function assistantMessageToMarkdown(msg: ConversationMessage, hideTools: boolean): string {
 	return getBlocks(msg.content)
+		.filter((b) => !(hideTools && b.type === 'tool_use'))
 		.map(assistantBlockToMarkdown)
 		.filter(Boolean)
 		.join('\n\n');
@@ -133,7 +136,7 @@ function deriveTitle(messages: ConversationMessage[], meta?: SessionMeta): strin
 }
 
 export function sessionToMarkdown(input: SessionMarkdownInput): string {
-	const { sessionId, projectName, messages, meta } = input;
+	const { sessionId, projectName, messages, meta, hideTools = false } = input;
 
 	const firstTs = formatTimestamp(messages[0]?.timestamp ?? '');
 	const lastTs = formatTimestamp(messages[messages.length - 1]?.timestamp ?? '');
@@ -148,6 +151,7 @@ export function sessionToMarkdown(input: SessionMarkdownInput): string {
 		headerLines.push(`**Date:** ${firstTs}${lastTs && lastTs !== firstTs ? ` → ${lastTs}` : ''}  `);
 	}
 	headerLines.push(`**Messages:** ${messages.length}  `);
+	if (hideTools) headerLines.push('**Filter:** tool calls omitted  ');
 	if (meta?.input_tokens || meta?.output_tokens) {
 		headerLines.push(
 			`**Tokens:** ${meta.input_tokens?.toLocaleString() ?? 0} in / ${meta.output_tokens?.toLocaleString() ?? 0} out  `
@@ -163,7 +167,7 @@ export function sessionToMarkdown(input: SessionMarkdownInput): string {
 			if (!body) continue;
 			sections.push(`### 👤 User${ts ? ` · ${ts}` : ''}\n\n${body}`);
 		} else if (msg.role === 'assistant') {
-			const body = assistantMessageToMarkdown(msg);
+			const body = assistantMessageToMarkdown(msg, hideTools);
 			if (!body) continue;
 			const model = msg.model ? ` (\`${msg.model.replace('claude-', '')}\`)` : '';
 			sections.push(`### ✦ Claude${model}${ts ? ` · ${ts}` : ''}\n\n${body}`);

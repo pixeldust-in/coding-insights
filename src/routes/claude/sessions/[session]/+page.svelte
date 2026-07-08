@@ -12,11 +12,13 @@
 	let allMessages = $derived([...data.messages, ...extraMessages]);
 	let totalCount = $derived(data.totalCount);
 
+	let hideTools = $state(false);
+	const exportSuffix = $derived(hideTools ? '?hideTools=1' : '');
 	const exportMdUrl = $derived(
-		`/api/claude/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/export`
+		`/api/claude/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/export${exportSuffix}`
 	);
 	const printUrl = $derived(
-		`/claude/projects/${encodeURIComponent(data.projectDir)}/${data.sessionId}/print`
+		`/claude/projects/${encodeURIComponent(data.projectDir)}/${data.sessionId}/print${exportSuffix}`
 	);
 
 	async function loadMore() {
@@ -148,5 +150,5 @@
 	{/if}
 
 	<!-- Messages -->
-	<MessageThread messages={allMessages} {totalCount} onLoadMore={loadMore} />
+	<MessageThread messages={allMessages} {totalCount} onLoadMore={loadMore} bind:hideTools />
 </div>

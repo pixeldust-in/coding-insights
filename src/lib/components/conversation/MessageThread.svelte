@@ -1,20 +1,27 @@
 <script lang="ts">
 	import UserMessage from './UserMessage.svelte';
 	import AssistantMessage from './AssistantMessage.svelte';
+	import { hasNonToolContent } from '$utils/message-filter.js';
 	import type { ConversationMessage } from '$lib/server/types.js';
 
 	let {
 		messages,
 		totalCount,
-		onLoadMore
+		onLoadMore,
+		hideTools = $bindable(false)
 	}: {
 		messages: ConversationMessage[];
 		totalCount: number;
 		onLoadMore?: () => void;
+		hideTools?: boolean;
 	} = $props();
 
 	let loading = $state(false);
 	let expandDiffs = $state(false);
+
+	let visibleMessages = $derived(
+		hideTools ? messages.filter((m) => m.role !== 'assistant' || hasNonToolContent(m)) : messages
+	);
 
 	async function handleLoadMore() {
 		if (onLoadMore) {
@@ -26,8 +33,22 @@
 </script>
 
 <div class="space-y-6">
-	<!-- Diff toggle -->
-	<div class="flex items-center justify-end">
+	<!-- View toggles -->
+	<div class="flex items-center justify-end gap-2">
+		<button
+			onclick={() => (hideTools = !hideTools)}
+			class="flex items-center gap-2 px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors cursor-pointer {hideTools
+				? 'border-accent/40 bg-accent/10 text-accent'
+				: 'border-border-subtle bg-surface text-text-muted hover:text-text-secondary hover:border-border'}"
+			title="Show only user and assistant messages"
+		>
+			<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+				<path
+					d="M1.75 2.5h12.5a.75.75 0 010 1.5H1.75a.75.75 0 010-1.5zm2.5 4.5h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5zm2.5 4.5h2.5a.75.75 0 010 1.5h-2.5a.75.75 0 010-1.5z"
+				/>
+			</svg>
+			Hide tools
+		</button>
 		<button
 			onclick={() => (expandDiffs = !expandDiffs)}
 			class="flex items-center gap-2 px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors cursor-pointer {expandDiffs
@@ -42,7 +63,7 @@
 		</button>
 	</div>
 
-	{#each messages as msg (msg.id)}
+	{#each visibleMessages as msg (msg.id)}
 		<div class="py-2">
 			{#if msg.role === 'user'}
 				<UserMessage content={msg.content} timestamp={msg.timestamp} />
@@ -53,6 +74,7 @@
 					model={msg.model}
 					tokens={msg.tokens}
 					{expandDiffs}
+					{hideTools}
 				/>
 			{/if}
 		</div>

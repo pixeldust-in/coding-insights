@@ -11,13 +11,15 @@
 		timestamp,
 		model,
 		tokens,
-		expandDiffs = false
+		expandDiffs = false,
+		hideTools = false
 	}: {
 		content: string | ContentBlock[];
 		timestamp: string;
 		model?: string;
 		tokens?: { input?: number; output?: number };
 		expandDiffs?: boolean;
+		hideTools?: boolean;
 	} = $props();
 
 	function getBlocks(c: string | ContentBlock[]): ContentBlock[] {
@@ -51,7 +53,9 @@
 				{#if block.type === 'thinking'}
 					<ThinkingBlock content={block.thinking} />
 				{:else if block.type === 'tool_use'}
-					<ToolCallCard name={block.name} input={block.input} {expandDiffs} />
+					{#if !hideTools}
+						<ToolCallCard name={block.name} input={block.input} {expandDiffs} />
+					{/if}
 				{:else if block.type === 'tool_result'}
 					<!-- Tool results are shown inline in tool call cards -->
 				{:else if block.type === 'image'}

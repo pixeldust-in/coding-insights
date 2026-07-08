@@ -4,9 +4,24 @@
 	import ImageBlock from '$components/conversation/ImageBlock.svelte';
 	import { formatDateTime, formatTokens } from '$utils/format.js';
 	import { formatToolInput } from '$utils/tool-format.js';
+	import { hasNonToolContent } from '$utils/message-filter.js';
 	import type { ContentBlock } from '$lib/server/types.js';
 
 	let { data } = $props();
+
+	// Seeded from the ?hideTools URL param; afterwards the toolbar toggle owns it
+	// svelte-ignore state_referenced_locally
+	let hideTools = $state(data.hideTools);
+
+	let visibleMessages = $derived(
+		hideTools
+			? data.messages.filter((m) => m.role !== 'assistant' || hasNonToolContent(m))
+			: data.messages
+	);
+
+	const exportMdUrl = $derived(
+		`/api/claude/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/export${hideTools ? '?hideTools=1' : ''}`
+	);
 
 	function getBlocks(c: string | ContentBlock[]): ContentBlock[] {
 		if (typeof c === 'string') return [{ type: 'text', text: c }];
@@ -38,8 +53,17 @@
 		← Back to session
 	</a>
 	<div class="flex items-center gap-2">
+		<button
+			onclick={() => (hideTools = !hideTools)}
+			class="px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors cursor-pointer {hideTools
+				? 'border-accent/40 bg-accent/10 text-accent'
+				: 'border-border-subtle bg-surface text-text-muted hover:text-text-secondary hover:border-border'}"
+			title="Show only user and assistant messages"
+		>
+			Hide tools
+		</button>
 		<a
-			href={`/api/claude/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/export`}
+			href={exportMdUrl}
 			class="px-3 py-1.5 text-xs font-mono rounded-lg border border-border-subtle bg-surface text-text-muted hover:text-text-secondary hover:border-border transition-colors"
 		>
 			↓ Markdown
@@ -62,7 +86,7 @@
 		<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-text-muted font-mono">
 			<span>{data.displayName}</span>
 			<span>{data.sessionId}</span>
-			<span>{data.totalCount} messages</span>
+			<span>{visibleMessages.length} messages{hideTools ? ' · tools hidden' : ''}</span>
 			{#if data.messages[0]?.timestamp}
 				<span>{formatDateTime(data.messages[0].timestamp)}</span>
 			{/if}
@@ -74,7 +98,7 @@
 
 	<!-- Transcript -->
 	<div class="space-y-8">
-		{#each data.messages as msg (msg.id)}
+		{#each visibleMessages as msg (msg.id)}
 			{#if msg.role === 'user'}
 				<div class="message-block">
 					<UserMessage content={msg.content} timestamp={msg.timestamp} />
@@ -108,7 +132,7 @@
 											{block.thinking}
 										</div>
 									</div>
-								{:else if block.type === 'tool_use'}
+								{:else if block.type === 'tool_use' && !hideTools}
 									<div class="flex items-baseline gap-2 text-xs font-mono py-0.5 tool-line">
 										<span class="text-text-muted shrink-0">▸</span>
 										<span class="text-text-secondary font-medium shrink-0">{block.name}</span>
