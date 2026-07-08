@@ -12,6 +12,13 @@
 	let allMessages = $derived([...data.messages, ...extraMessages]);
 	let totalCount = $derived(data.totalCount);
 
+	const exportMdUrl = $derived(
+		`/api/claude/sessions/${encodeURIComponent(data.projectDir)}/${data.sessionId}/export`
+	);
+	const printUrl = $derived(
+		`/claude/projects/${encodeURIComponent(data.projectDir)}/${data.sessionId}/print`
+	);
+
 	async function loadMore() {
 		const offset = allMessages.length;
 		const res = await fetch(
@@ -32,21 +39,40 @@
 
 <div class="p-6 space-y-6">
 	<!-- Session Title Card -->
-	{#if data.firstPrompt || data.meta?.summary}
-		<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
-			<p class="text-sm font-medium truncate">
-				{data.meta?.summary || data.firstPrompt}
-			</p>
-			<div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-text-muted">
-				<span>{data.totalCount} messages</span>
-				<SessionId sessionId={data.sessionId} />
+	<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
+		<div class="flex items-start justify-between gap-3">
+			<div class="min-w-0">
+				{#if data.firstPrompt || data.meta?.summary}
+					<p class="text-sm font-medium truncate">
+						{data.meta?.summary || data.firstPrompt}
+					</p>
+					<div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-text-muted">
+						<span>{data.totalCount} messages</span>
+						<SessionId sessionId={data.sessionId} />
+					</div>
+				{:else}
+					<SessionId sessionId={data.sessionId} />
+				{/if}
+			</div>
+			<div class="flex items-center gap-2 shrink-0">
+				<a
+					href={exportMdUrl}
+					class="px-3 py-1.5 text-xs font-mono rounded-lg border border-border-subtle bg-surface text-text-muted hover:text-text-secondary hover:border-border transition-colors"
+					title="Download the full transcript as Markdown"
+				>
+					↓ Markdown
+				</a>
+				<a
+					href={printUrl}
+					target="_blank"
+					class="px-3 py-1.5 text-xs font-mono rounded-lg border border-border-subtle bg-surface text-text-muted hover:text-text-secondary hover:border-border transition-colors"
+					title="Open a print-friendly view to save as PDF"
+				>
+					⎙ PDF
+				</a>
 			</div>
 		</div>
-	{:else}
-		<div class="bg-surface border border-border-subtle rounded-xl p-4 card-elevated">
-			<SessionId sessionId={data.sessionId} />
-		</div>
-	{/if}
+	</div>
 
 	<!-- Session Meta Bar -->
 	{#if data.meta || data.facets}

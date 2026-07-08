@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DiffView from './DiffView.svelte';
+	import { formatToolInput } from '$utils/tool-format.js';
 
 	let {
 		name,
@@ -36,21 +37,6 @@
 		WebFetch: 'text-[#6A9FBF]'
 	};
 
-	function formatInput(inp: Record<string, unknown>): string {
-		if (name === 'Bash' && inp.command) return String(inp.command).slice(0, 200);
-		if (name === 'exec_command' && inp.raw) return String(inp.raw).slice(0, 200);
-		if (name === 'Read' && inp.file_path) return String(inp.file_path);
-		if ((name === 'Write' || name === 'Edit') && inp.file_path) return String(inp.file_path);
-		if (name === 'apply_patch' && inp.patch) {
-			const patch = String(inp.patch);
-			const fileMatch = patch.match(/\*\*\* (?:Update|Add|Delete) File:\s*(\S+)/);
-			return fileMatch ? fileMatch[1] : 'patch';
-		}
-		if (name === 'Glob' && inp.pattern) return String(inp.pattern);
-		if (name === 'Grep' && inp.pattern) return String(inp.pattern);
-		return JSON.stringify(inp, null, 2).slice(0, 500);
-	}
-
 	const diffToolName = $derived<'Edit' | 'Write' | 'apply_patch'>(
 		name === 'apply_patch' ? 'apply_patch' : name as 'Edit' | 'Write'
 	);
@@ -64,7 +50,7 @@
 		<span class="transition-transform {open ? 'rotate-90' : ''} text-text-muted">▸</span>
 		<span class="{toolColors[name] || 'text-text-secondary'} font-mono">{name}</span>
 		<span class="text-text-muted truncate flex-1 text-left font-mono">
-			{formatInput(input)}
+			{formatToolInput(name, input)}
 		</span>
 	</button>
 	{#if open}

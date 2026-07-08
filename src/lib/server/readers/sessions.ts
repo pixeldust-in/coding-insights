@@ -53,6 +53,18 @@ export async function loadSession(
 	return { sessionId, projectDir, messages, totalCount, meta, facets, firstPrompt, activeDurationMinutes };
 }
 
+/**
+ * Load every message of a session without pagination or HTML rendering.
+ * Used by the transcript export endpoint, which needs the raw markdown text.
+ */
+export async function loadFullSession(
+	projectDir: string,
+	sessionId: string
+): Promise<{ messages: ConversationMessage[]; totalCount: number }> {
+	const filePath = join(PROJECTS_DIR, projectDir, `${sessionId}.jsonl`);
+	return streamSessionMessages(filePath, { offset: 0, limit: Number.MAX_SAFE_INTEGER });
+}
+
 export async function loadSessionMessages(
 	projectDir: string,
 	sessionId: string,
