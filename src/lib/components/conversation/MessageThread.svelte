@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import UserMessage from './UserMessage.svelte';
 	import AssistantMessage from './AssistantMessage.svelte';
 	import { hasNonToolContent } from '$utils/message-filter.js';
@@ -12,7 +13,7 @@
 	}: {
 		messages: ConversationMessage[];
 		totalCount: number;
-		onLoadMore?: () => void;
+		onLoadMore?: (limit?: number) => Promise<void>;
 		hideTools?: boolean;
 	} = $props();
 
@@ -23,14 +24,61 @@
 		hideTools ? messages.filter((m) => m.role !== 'assistant' || hasNonToolContent(m)) : messages
 	);
 
+	let jumping = $state(false);
+	let scrollY = $state(0);
+	let innerHeight = $state(0);
+	let docHeight = $state(0);
+	let bottomEl: HTMLDivElement | undefined = $state();
+
+	const hasMore = $derived(messages.length < totalCount);
+	const nearTop = $derived(scrollY < 400);
+	const nearBottom = $derived(!hasMore && scrollY + innerHeight >= docHeight - 400);
+
+	function measure() {
+		docHeight = document.documentElement.scrollHeight;
+	}
+
 	async function handleLoadMore() {
-		if (onLoadMore) {
-			loading = true;
-			onLoadMore();
+		if (!onLoadMore || loading) return;
+		loading = true;
+		try {
+			await onLoadMore();
+		} finally {
 			loading = false;
 		}
 	}
+
+	async function jumpToBottom() {
+		if (jumping) return;
+		jumping = true;
+		try {
+			if (hasMore && onLoadMore) {
+				loading = true;
+				try {
+					await onLoadMore(totalCount - messages.length);
+				} finally {
+					loading = false;
+				}
+				await tick();
+			}
+			bottomEl?.scrollIntoView({ block: 'end' });
+		} finally {
+			jumping = false;
+		}
+	}
+
+	function jumpToTop() {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	$effect(() => {
+		// Re-measure when the rendered list changes
+		visibleMessages.length;
+		tick().then(measure);
+	});
 </script>
+
+<svelte:window bind:scrollY bind:innerHeight onresize={measure} onscroll={measure} />
 
 <div class="space-y-6">
 	<!-- View toggles -->
@@ -91,4 +139,67 @@
 			</button>
 		</div>
 	{/if}
+	<div bind:this={bottomEl}></div>
 </div>
+
+<!-- Floating jump controls -->
+{#if !nearTop || !nearBottom}
+	<div class="fixed bottom-6 right-6 z-40 flex flex-col gap-2">
+		{#if !nearTop}
+			<button
+				onclick={jumpToTop}
+				class="jump-btn"
+				title="Jump to top"
+				aria-label="Jump to top"
+			>
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+					<path d="M3.22 9.78a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0l4.25 4.25a.75.75 0 01-1.06 1.06L8 6.06 4.28 9.78a.75.75 0 01-1.06 0z" />
+				</svg>
+			</button>
+		{/if}
+		{#if !nearBottom}
+			<button
+				onclick={jumpToBottom}
+				disabled={jumping}
+				class="jump-btn"
+				title={hasMore ? `Load all ${totalCount - messages.length} remaining and jump to end` : 'Jump to end'}
+				aria-label="Jump to end of conversation"
+			>
+				{#if jumping}
+					<svg class="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M8 1.5a6.5 6.5 0 106.5 6.5" stroke-linecap="round" />
+					</svg>
+				{:else}
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+						<path d="M12.78 6.22a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0L3.22 7.28a.75.75 0 011.06-1.06L8 9.94l3.72-3.72a.75.75 0 011.06 0z" />
+					</svg>
+				{/if}
+			</button>
+		{/if}
+	</div>
+{/if}
+
+<style>
+	.jump-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 9999px;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text-secondary);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		cursor: pointer;
+		transition: color 0.15s, border-color 0.15s;
+	}
+	.jump-btn:hover {
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+	}
+	.jump-btn:disabled {
+		opacity: 0.6;
+		cursor: progress;
+	}
+</style>

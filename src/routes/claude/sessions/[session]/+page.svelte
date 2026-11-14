@@ -21,10 +21,10 @@
 		`/claude/projects/${encodeURIComponent(data.projectDir)}/${data.sessionId}/print${exportSuffix}`
 	);
 
-	async function loadMore() {
+	async function loadMore(limit = 50) {
 		const offset = allMessages.length;
 		const res = await fetch(
-			`/api/claude/sessions/${data.sessionId}/messages?offset=${offset}&limit=50`
+			`/api/claude/sessions/${data.sessionId}/messages?offset=${offset}&limit=${limit}`
 		);
 		const json = await res.json();
 		extraMessages = [...extraMessages, ...json.messages];

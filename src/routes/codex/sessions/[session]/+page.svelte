@@ -11,10 +11,10 @@
 	let allMessages = $derived([...data.messages, ...extraMessages]);
 	let totalCount = $derived(data.totalCount);
 
-	async function loadMore() {
+	async function loadMore(limit = 50) {
 		const offset = allMessages.length;
 		const res = await fetch(
-			`/api/codex/sessions/${data.sessionId}/messages?offset=${offset}&limit=50`
+			`/api/codex/sessions/${data.sessionId}/messages?offset=${offset}&limit=${limit}`
 		);
 		const json = await res.json();
 		extraMessages = [...extraMessages, ...json.messages];
